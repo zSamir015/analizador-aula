@@ -1626,9 +1626,12 @@ class InterfazAULA:
     # PARTE 5: tabla de símbolos
     def mostrar_tabla(self):
         if self.ventana_tabla is not None and self.ventana_tabla.ventana.winfo_exists():
-            self.ventana_tabla.ventana.lift()
-            self.ventana_tabla.ventana.focus_set()
-            return
+            if self.ventana_tabla.tabla is self.tabla:
+                self.ventana_tabla.ventana.lift()
+                self.ventana_tabla.ventana.focus_set()
+                return
+            # Se analizó otro archivo: la ventana abierta muestra la tabla anterior
+            self.ventana_tabla.ventana.destroy()
         self.ventana_tabla = VentanaTabla(
             self.ventana,
             self.tabla,
