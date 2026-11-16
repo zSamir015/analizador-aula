@@ -4,11 +4,18 @@ Proyecto N° 1 de Lenguajes Formales, Autómatas y Compiladores (UTP, FISC).
 Analizador léxico con validación sintáctica simple para AULA, un lenguaje para
 definir horarios universitarios.
 
-Este repositorio cubre la Etapa 1 (definición del lenguaje) y los puntos 2
-(validación de cadenas), 3 (tabla de símbolos con función hash) y 4 (manejador
-de errores) de la Etapa 2. `interfaz.py` es la interfaz de usuario (punto 5):
-pide el archivo de entrada (punto 6), muestra los errores mientras se evalúa y
-permite ver la tabla de símbolos.
+Cubre las dos etapas del proyecto:
+
+| Punto | Contenido | Dónde |
+|---|---|---|
+| Etapa 1 | Definición del lenguaje AULA | este README, `docs/` |
+| 2 | Validación de cadenas con AFD | `aula/afd.py`, `automatas.py`, `lexico.py`, `sintaxis.py` |
+| 3 | Tabla de símbolos con función hash | `aula/tabla_simbolos.py` |
+| 4 | Manejador de errores | `aula/manejador_errores.py` |
+| 5 y 6 | Interfaz: pide el archivo, muestra los errores al evaluar y la tabla de símbolos | `interfaz.py` |
+
+El informe completo está en `docs/` (Word y PDF). Los cambios hechos después de
+la primera entrega están en `CHANGELOG.md`.
 
 Requiere Python 3.10 o superior con Tkinter (incluido en el instalador de
 python.org). No tiene dependencias externas.
@@ -125,25 +132,47 @@ por sentencia: la primera palabra de la línea determina la sentencia esperada.
 
 ```
 aula/
-  tokens.py     tipos de token, palabras reservadas, catálogo de errores
-  afd.py        clase AFD (Q, Σ, δ, q0, F)
-  automatas.py  un AFD por token
-  lexico.py     análisis léxico
-  sintaxis.py   validación de sentencias
-  validador.py  API pública
+  tokens.py            tipos de token, palabras reservadas, catálogo de errores
+  afd.py               clase AFD (Q, Σ, δ, q0, F)
+  automatas.py         un AFD por token
+  lexico.py            análisis léxico
+  sintaxis.py          validación de sentencias
+  validador.py         API pública y lectura del archivo (UTF-8 o ANSI)
   tabla_simbolos.py    tabla de símbolos (tabla hash con encadenamiento)
   manejador_errores.py manejador de errores
-jflap/          AFD en formato JFLAP 7 (simulacion/: versión para simular)
-diagramas/      AFD en PNG
-herramientas/   exportar_automatas.py genera jflap/ y diagramas/
+interfaz.py            interfaz gráfica (Tkinter)
+demo.py                versión de consola
+ejemplos/              horario_valido.txt y horario_errores.txt
+tests/                 pruebas unitarias
+jflap/                 AFD en formato JFLAP 7 para ver los diagramas
+jflap/simulacion/      los mismos AFD listos para simular, y las cadenas de prueba
+diagramas/             AFD en PNG (Graphviz)
+herramientas/          exportar_automatas.py y corridas_jflap.js
+docs/                  informe del proyecto (Word y PDF)
 ```
 
-En `jflap/` cada transición muestra la clase de caracteres que lee (`0-9`,
-`A-Z`...). JFLAP toma esas etiquetas como texto literal, así que para simular
-se usan los archivos de `jflap/simulacion/`: mismos estados, con una
-transición por cada carácter de la clase. Ahí está también
-`cadenas_de_prueba.txt` con las cadenas usadas en Input > Multiple Run y el
-resultado obtenido en JFLAP 7.1.
+## JFLAP
+
+Hay dos versiones de cada autómata:
+
+- `jflap/*.jff`: cada flecha lleva las clases de caracteres que lee
+  (`a-z, A-Z, 0-9, _`). Es la versión para ver el diagrama; JFLAP toma esas
+  etiquetas como texto literal, así que no sirve para simular.
+- `jflap/simulacion/*.jff`: mismos estados, con una transición por cada
+  carácter de la clase (`0-9` son diez transiciones). Las clases `Σ` y `Σ-{"}`
+  se expanden a letras, dígitos, tildes, ñ y los símbolos del lenguaje; el
+  espacio queda fuera porque en JFLAP una etiqueta vacía es λ.
+
+`jflap/simulacion/cadenas_de_prueba.txt` tiene las 87 cadenas usadas en
+Input > Multiple Run y el resultado que dio JFLAP 7.1. Para repetir las
+corridas sin abrir JFLAP (usa el mismo simulador):
+
+```bash
+jjs -cp /ruta/JFLAP7.1.jar herramientas/corridas_jflap.js
+```
+
+`jjs` viene con Java 8. Los `.jff` y los diagramas se regeneran desde las
+tablas de `aula/automatas.py` con `python3 herramientas/exportar_automatas.py`.
 
 ## API
 
@@ -229,3 +258,40 @@ for r in analizar_archivo(ruta):
 # al final, si el usuario lo pide:
 print(tabla.formatear())
 ```
+
+## Interfaz
+
+`python3 interfaz.py` abre la ventana principal:
+
+- **Seleccionar archivo** (Ctrl/Cmd+O) pide el archivo de entrada; los botones
+  *Válido* y *Con errores* cargan los ejemplos. El contenido se muestra con
+  números de línea y resaltado.
+- **Analizar archivo** (Ctrl/Cmd+Enter) evalúa una línea a la vez. Cada error
+  aparece cuando el manejador lo reporta; en el código se marca la línea y se
+  subraya el lexema. Las pestañas muestran el diagnóstico (filtrable), la tabla
+  de errores (al elegir uno salta a la línea) y los tokens.
+- **Ver tabla de símbolos** (Ctrl/Cmd+T) abre la tabla con tres vistas:
+  tabular (ordenable y con buscador), cubetas hash y texto formateado.
+- Tema claro u oscuro y evaluación paso a paso opcional.
+
+Usa solo Tkinter con el tema `clam` y colores propios, así que se ve igual en
+Windows, macOS y Linux.
+
+## Pruebas
+
+```bash
+python3 -m unittest discover -s tests -t .
+```
+
+52 pruebas: aceptación y rechazo de cada AFD y determinismo de las tablas
+(`test_afd.py`); tokens, posiciones, los 15 errores, las 11 sentencias,
+archivos de ejemplo y codificaciones (`test_validador.py`); función hash,
+colisiones, redimensionamiento, atributos, formato y suscripción del manejador
+(`test_tabla_y_errores.py`).
+
+## Integrantes
+
+- Batista, Rafael
+- Lorenzo Herrera, Samir Alexis
+- Messam, Alan
+- Saez, Daniel
