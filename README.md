@@ -4,9 +4,10 @@ Proyecto N° 1 de Lenguajes Formales, Autómatas y Compiladores (UTP, FISC).
 Analizador léxico con validación sintáctica simple para AULA, un lenguaje para
 definir horarios universitarios.
 
-Este repositorio cubre la Etapa 1 (definición del lenguaje) y el punto 2 de la
-Etapa 2 (validación de cadenas). La tabla de símbolos, el manejador de errores
-y su interfaz se integran sobre la API descrita abajo.
+Este repositorio cubre la Etapa 1 (definición del lenguaje) y los puntos 2
+(validación de cadenas), 3 (tabla de símbolos con función hash) y 4 (manejador
+de errores) de la Etapa 2. La interfaz de usuario (punto 5) y la solicitud del
+archivo (punto 6) se integran sobre la API descrita abajo.
 
 Requiere Python 3.10 o superior. No tiene dependencias externas.
 
@@ -126,6 +127,8 @@ aula/
   lexico.py     análisis léxico
   sintaxis.py   validación de sentencias
   validador.py  API pública
+  tabla_simbolos.py    tabla de símbolos (tabla hash con encadenamiento)
+  manejador_errores.py manejador de errores
 jflap/          AFD en formato JFLAP 7
 diagramas/      AFD en PNG
 herramientas/   exportar_automatas.py genera jflap/ y diagramas/
@@ -148,3 +151,73 @@ for r in analizar_archivo("entrada.txt"):   # generador, una línea a la vez
 ```
 
 `aula.ERRORES` contiene el catálogo completo (`codigo -> (categoria, descripcion)`).
+
+## Tabla de símbolos
+
+`aula/tabla_simbolos.py`: tabla hash con encadenamiento separado. La función
+hash es polinomial (`h = h*31 + código del carácter`, 32 bits) y el índice es
+`hash % capacidad`. Empieza con capacidad 53 (primo), se precarga con las 27
+palabras reservadas y los 5 días, y se duplica a un primo mayor cuando el
+factor de carga pasa de 0.75.
+
+Cada `Simbolo` guarda `lexema`, `tipo`, `categoria`, `linea`/`columna` de la
+primera aparición, `ocurrencias` (todas las posiciones, `veces` = cuántas) y
+`atributos` para las fases siguientes: `tipo_dato`, `valor`, `declarado`,
+`linea_declaracion`, `nombre`, `creditos`, `capacidad`, `redeclaraciones`.
+
+```python
+from aula import TablaSimbolos, analizar_archivo
+
+tabla = TablaSimbolos()
+for r in analizar_archivo("entrada.txt"):
+    tabla.registrar(r)         # solo instala las líneas válidas
+
+tabla.buscar("max_creditos").atributos   # {'declarado': True, 'tipo_dato': 'entero', 'valor': 18, ...}
+print(tabla.formatear())                 # contenido de la tabla (punto 5)
+print(tabla.formatear_cubetas())         # estructura interna por cubeta
+tabla.estadisticas()                     # factor de carga, colisiones, ...
+```
+
+Las líneas con errores no se instalan: sus declaraciones no son confiables.
+
+## Manejador de errores
+
+`aula/manejador_errores.py`: recibe los errores léxicos y sintácticos, los
+registra y los informa con el texto de la línea, un indicador de la columna y
+una sugerencia de corrección. La interfaz se suscribe con un callback que se
+invoca en el momento en que se detecta cada error, es decir, durante la
+evaluación de la cadena.
+
+```python
+from aula import ManejadorErrores, analizar_archivo
+
+manejador = ManejadorErrores()
+manejador.suscribir(lambda reg: print(manejador.formatear(reg)))
+
+for r in analizar_archivo("entrada.txt"):
+    manejador.procesar(r)      # reporta todos los errores de la línea
+
+print(manejador.resumen())     # totales por código y por categoría
+```
+
+```
+✗ [E07] Grupo mal formado (línea 6, columna 7)
+    Grupo mal formado '1IL14' (formato: 1IL142)
+       6 | grupo 1IL14;
+         |       ^^^^^
+    Sugerencia: El grupo lleva un dígito, dos letras mayúsculas y tres dígitos (1IL142).
+```
+
+Consultas: `registros`, `total`, `hay_errores`, `lineas_con_error`,
+`errores_de_linea(n)`, `por_categoria("LEXICO"|"SINTACTICO")`,
+`conteo_por_codigo()`.
+
+### Integración de ambos módulos
+
+```python
+for r in analizar_archivo(ruta):
+    manejador.procesar(r)
+    tabla.registrar(r)
+# al final, si el usuario lo pide:
+print(tabla.formatear())
+```
