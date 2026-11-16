@@ -283,6 +283,12 @@ print(tabla.formatear())
 - **Ver tabla de símbolos** (Ctrl/Cmd+T) abre la tabla con dos vistas:
   tabular (ordenada por índice, ordenable y con buscador) y texto formateado.
 - Tema claro u oscuro y evaluación paso a paso opcional.
+- Colores: verde indica correcto y rojo, error (líneas, lexemas y contadores).
+  Cada tipo de token tiene un color propio, igual en el código, en la tabla de
+  tokens y en la tabla de símbolos: azul palabra reservada, violeta
+  identificador, cian materia/grupo/aula, ámbar día, naranja número u hora,
+  rosa cadena, gris claro operadores y `;`, gris comentario. La ventana muestra
+  la leyenda.
 
 Usa solo Tkinter con el tema `clam` y colores propios, así que se ve igual en
 Windows, macOS y Linux.

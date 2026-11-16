@@ -55,12 +55,15 @@ TEMAS = {
         "scroll_activo": "#475569",
         "fila_par": "#111A2B",
         # Sintaxis en el visor de código
+        # Un color por clase de token; verde y rojo solo indican correcto / error
         "syn_reservada": "#60A5FA",
-        "syn_tipo": "#38BDF8",
+        "syn_tipo": "#60A5FA",
+        "syn_identificador": "#C084FC",
         "syn_dia": "#FBBF24",
-        "syn_entidad": "#34D399",
-        "syn_cadena": "#A7F3D0",
+        "syn_entidad": "#22D3EE",
+        "syn_cadena": "#F9A8D4",
         "syn_numero": "#FB923C",
+        "syn_operador": "#CBD5E1",
         "syn_comentario": "#64748B",
     },
     "claro": {
@@ -89,14 +92,64 @@ TEMAS = {
         "fila_par": "#F8FAFC",
         # Sintaxis en el visor de código
         "syn_reservada": "#1D4ED8",
-        "syn_tipo": "#0369A1",
+        "syn_tipo": "#1D4ED8",
+        "syn_identificador": "#7E22CE",
         "syn_dia": "#B45309",
-        "syn_entidad": "#047857",
-        "syn_cadena": "#15803D",
+        "syn_entidad": "#0E7490",
+        "syn_cadena": "#A21CAF",
         "syn_numero": "#C2410C",
+        "syn_operador": "#475569",
         "syn_comentario": "#7B8794",
     },
 }
+
+# Color de cada tipo de token (clave de la paleta). Se usa igual en el código,
+# en la tabla de tokens y en la tabla de símbolos.
+COLOR_TOKEN = {
+    "RESERVADA": "syn_reservada",
+    "IDENTIFICADOR": "syn_identificador",
+    "CODIGO_MATERIA": "syn_entidad",
+    "GRUPO": "syn_entidad",
+    "AULA": "syn_entidad",
+    "DIA": "syn_dia",
+    "HORA": "syn_numero",
+    "RANGO_HORA": "syn_numero",
+    "ENTERO": "syn_numero",
+    "REAL": "syn_numero",
+    "CADENA": "syn_cadena",
+    "OP_RELACIONAL": "syn_operador",
+    "ASIGNACION": "syn_operador",
+    "DELIMITADOR": "syn_operador",
+}
+
+LEYENDA_COLORES = (
+    ("verde", "✓ correcto"),
+    ("rojo", "✗ error"),
+    ("syn_reservada", "palabra reservada"),
+    ("syn_identificador", "identificador"),
+    ("syn_entidad", "materia, grupo, aula"),
+    ("syn_dia", "día"),
+    ("syn_numero", "número u hora"),
+    ("syn_cadena", "cadena"),
+    ("syn_operador", "operador, ;"),
+    ("syn_comentario", "comentario"),
+)
+
+
+def leyenda_colores(padre, paleta, fuente, fondo):
+    """Dos filas: estado (verde / rojo) y color de cada tipo de token."""
+    marco = tk.Frame(padre, bg=fondo)
+    filas = (("Estado:", LEYENDA_COLORES[:2]), ("Tokens:", LEYENDA_COLORES[2:]))
+    for fila, (titulo, items) in enumerate(filas):
+        f = tk.Frame(marco, bg=fondo)
+        f.grid(row=fila, column=0, sticky="w")
+        tk.Label(f, text=titulo, font=fuente, bg=fondo, fg=paleta["tenue"], width=7,
+                 anchor="w").pack(side="left")
+        for clave, texto in items:
+            tk.Label(f, text="■ " + texto, font=fuente, bg=fondo,
+                     fg=paleta[clave]).pack(side="left", padx=(6, 0))
+    return marco
+
 
 # Expresiones regulares para resaltado léxico en el visor de código fuente
 _RE_CADENA = re.compile(r'"[^"\n]*"?')
@@ -714,6 +767,10 @@ class InterfazAULA:
             fg=c["verde"],
         ).pack(side="right")
 
+        leyenda_colores(marco, c, self.f_etiqueta, c["fondo"]).grid(
+            row=2, column=0, sticky="w", pady=(6, 0)
+        )
+
         tarjeta = self.tarjeta(marco, row=1, column=0, sticky="nsew")
         tarjeta.columnconfigure(2, weight=1)
         tarjeta.rowconfigure(0, weight=1)
@@ -785,7 +842,9 @@ class InterfazAULA:
         self.editor_codigo.tag_configure("syn_numero", foreground=c["syn_numero"])
         self.editor_codigo.tag_configure("syn_entidad", foreground=c["syn_entidad"])
         self.editor_codigo.tag_configure("syn_cadena", foreground=c["syn_cadena"])
+        self.editor_codigo.tag_configure("syn_identificador", foreground=c["syn_identificador"])
         self.editor_codigo.tag_configure("syn_comentario", foreground=c["syn_comentario"])
+        self.editor_codigo.tag_raise("lexema_error")
 
         self._escribir_editor(
             "# Seleccione un archivo .txt o pulse uno de los ejemplos superiores\n"
@@ -835,6 +894,7 @@ class InterfazAULA:
             "syn_numero",
             "syn_entidad",
             "syn_cadena",
+            "syn_identificador",
             "syn_comentario",
         ):
             self.editor_codigo.tag_remove(tag, "1.0", tk.END)
@@ -856,6 +916,8 @@ class InterfazAULA:
                     self.editor_codigo.tag_add("syn_reservada", ini, fin)
                 elif pal in DIAS:
                     self.editor_codigo.tag_add("syn_dia", ini, fin)
+                elif pal[0].islower() or pal[0] == "_":
+                    self.editor_codigo.tag_add("syn_identificador", ini, fin)
 
             for patron in (_RE_RANGO_HORA, _RE_HORA, _RE_NUMERO):
                 for m in patron.finditer(fragmento):
@@ -871,7 +933,7 @@ class InterfazAULA:
 
             for m in _RE_CADENA.finditer(fragmento):
                 ini, fin = f"{idx}.{m.start()}", f"{idx}.{m.end()}"
-                for t_prev in ("syn_reservada", "syn_tipo", "syn_dia", "syn_numero", "syn_entidad"):
+                for t_prev in ("syn_reservada", "syn_tipo", "syn_dia", "syn_numero", "syn_entidad", "syn_identificador"):
                     self.editor_codigo.tag_remove(t_prev, ini, fin)
                 self.editor_codigo.tag_add("syn_cadena", ini, fin)
 
@@ -1101,12 +1163,14 @@ class InterfazAULA:
             ("columna", "Col", 55, "e"),
             ("tipo", "Tipo de token", 150, "w"),
             ("lexema", "Lexema", 200, "w"),
-            ("estado", "Línea", 85, "center"),
+            ("estado", "Estado de la línea", 130, "center"),
             ("hash", "Cubeta", 70, "e"),
         ):
             self.tree_tokens.heading(cid, text=tit_c, anchor=al_c)
             self.tree_tokens.column(cid, width=w_c, anchor=al_c, stretch=(cid == "lexema"))
         self.tree_tokens.tag_configure("par", background=c["fila_par"])
+        for tipo_t, clave_c in COLOR_TOKEN.items():
+            self.tree_tokens.tag_configure(tipo_t, foreground=c[clave_c])
         self.tree_tokens.grid(row=1, column=0, sticky="nsew")
 
         sv_t = ttk.Scrollbar(v_tokens, orient="vertical", command=self.tree_tokens.yview)
@@ -1199,7 +1263,7 @@ class InterfazAULA:
                 and busq not in tok.tipo.lower()
             ):
                 continue
-            tags = ("par",) if fila % 2 else ()
+            tags = (("par",) if fila % 2 else ()) + (tok.tipo,)
             self.tree_tokens.insert(
                 "",
                 "end",
@@ -1209,7 +1273,7 @@ class InterfazAULA:
                     tok.columna,
                     tok.tipo,
                     tok.lexema,
-                    "válida" if res.valida else "con error",
+                    "✓ válida" if res.valida else "✗ con error",
                     self.tabla.indice(tok.lexema),
                 ),
             )
@@ -1457,7 +1521,7 @@ class InterfazAULA:
             for tok in resultado.tokens:
                 fila_t = len(self._todos_tokens)
                 self._todos_tokens.append((resultado, tok))
-                tags_t = ("par",) if fila_t % 2 else ()
+                tags_t = (("par",) if fila_t % 2 else ()) + (tok.tipo,)
                 self.tree_tokens.insert(
                     "",
                     "end",
@@ -1467,7 +1531,7 @@ class InterfazAULA:
                         tok.columna,
                         tok.tipo,
                         tok.lexema,
-                        "válida" if resultado.valida else "con error",
+                        "✓ válida" if resultado.valida else "✗ con error",
                         self.tabla.indice(tok.lexema),
                     ),
                 )
@@ -1707,7 +1771,10 @@ class VentanaTabla:
             bg=c["superficie"],
             fg=c["tenue"],
             justify="left",
-        ).pack(anchor="w", padx=20, pady=(0, 12))
+        ).pack(anchor="w", padx=20, pady=(0, 6))
+        leyenda_colores(encabezado, c, ui.f_subtitulo, c["superficie"]).pack(
+            anchor="w", padx=20, pady=(0, 12)
+        )
 
         # Barra de herramientas: sub-vistas + buscador + filtros
         barra = ttk.Frame(v, padding=(20, 12, 20, 8))
@@ -1821,9 +1888,8 @@ class VentanaTabla:
                 minwidth=55,
             )
         self.arbol.tag_configure("par", background=c["fila_par"])
-        self.arbol.tag_configure("reservada", foreground=c["tenue"])
-        self.arbol.tag_configure("entidad", foreground=c["verde"])
-        self.arbol.tag_configure("variable", foreground=c["acento_claro"])
+        for tipo_t, clave_c in COLOR_TOKEN.items():
+            self.arbol.tag_configure(tipo_t, foreground=c[clave_c])
         self.arbol.grid(row=0, column=0, sticky="nsew")
 
         sv = ttk.Scrollbar(m_tabla, orient="vertical", command=self.arbol.yview)
@@ -1947,12 +2013,7 @@ class VentanaTabla:
 
         for fila, (s, fijo) in enumerate(filas_datos):
             tags = ["par"] if fila % 2 else []
-            if fijo:
-                tags.append("reservada")
-            elif s.categoria in ("materia", "profesor", "aula", "grupo"):
-                tags.append("entidad")
-            elif s.categoria in ("variable", "identificador"):
-                tags.append("variable")
+            tags.append(s.tipo)
 
             self.arbol.insert(
                 "",
