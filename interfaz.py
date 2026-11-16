@@ -1327,7 +1327,12 @@ class InterfazAULA:
         self.lineas = 0
 
         self.etiqueta_archivo.config(text=Path(ruta).name)
-        self.etiqueta_ruta.config(text=str(Path(ruta).parent))
+        carpeta = Path(ruta).resolve().parent
+        try:
+            carpeta = "~/" + str(carpeta.relative_to(Path.home()))
+        except ValueError:
+            pass
+        self.etiqueta_ruta.config(text=str(carpeta))
         self.estado.set("Archivo seleccionado. Listo para analizar.")
         self.boton_analizar.config(state="normal")
         self.boton_tabla.config(state="disabled")
