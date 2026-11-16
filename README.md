@@ -27,6 +27,15 @@ la primera entrega están en `CHANGELOG.md`.
 Requiere Python 3.10 o superior con Tkinter (incluido en el instalador de
 python.org). No tiene dependencias externas.
 
+## Versión web
+
+https://zsamir015.github.io/analizador-aula/ ejecuta el mismo paquete `aula`
+en el navegador con Pyodide (Python compilado a WebAssembly): se elige un
+archivo o un ejemplo y se ven los errores durante la evaluación, los tokens y
+la tabla de símbolos. Con `?ejemplo=valido` o `?ejemplo=errores` el ejemplo se
+analiza al abrir la página. La página está en `web/` y se publica en GitHub
+Pages con `.github/workflows/pages.yml`.
+
 ## Uso
 
 ```bash

@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analizador AULA</title>
+<style>
+:root {
+  --fondo: #0B0F17; --superficie: #111827; --editor: #0D131F; --gutter: #090D16;
+  --borde: #1E293B; --texto: #F1F5F9; --tenue: #94A3B8; --apagado: #64748B;
+  --acento: #2563EB; --acento-claro: #38BDF8; --fila-par: #111A2B;
+  --verde: #10B981; --verde-fondo: #062E22; --rojo: #F43F5E; --rojo-fondo: #2D0F18; --ambar: #F59E0B;
+  --t-reservada: #60A5FA; --t-identificador: #C084FC; --t-entidad: #22D3EE; --t-dia: #FBBF24;
+  --t-numero: #FB923C; --t-cadena: #F9A8D4; --t-operador: #CBD5E1; --t-comentario: #64748B;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); color: var(--texto);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { background: var(--superficie); border-bottom: 1px solid var(--borde);
+  padding: 14px 20px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.marca { background: var(--acento); font-weight: 700; padding: 4px 10px; border-radius: 4px; font-size: 13px; }
+h1 { font-size: 18px; margin: 0; }
+header p { margin: 0; color: var(--tenue); font-size: 12px; }
+main { padding: 16px 20px; max-width: 1500px; margin: 0 auto; }
+.barra { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+button, .boton { background: var(--superficie); color: var(--texto); border: 1px solid var(--borde);
+  padding: 7px 12px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 13px; }
+button:hover, .boton:hover { border-color: var(--acento-claro); }
+button.primario { background: var(--acento); border-color: var(--acento); font-weight: 600; }
+button:disabled { opacity: .45; cursor: default; }
+input[type=file] { display: none; }
+#estado { color: var(--tenue); font-size: 12px; margin-left: auto; }
+.contadores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 12px; }
+.contador { background: var(--superficie); border: 1px solid var(--borde); border-radius: 8px; padding: 10px 14px; }
+.contador b { display: block; font-size: 24px; }
+.contador span { color: var(--tenue); font-size: 12px; }
+.progreso { height: 6px; background: var(--borde); border-radius: 3px; margin-bottom: 12px; overflow: hidden; }
+.progreso div { height: 100%; width: 0; background: var(--acento); transition: width .1s; }
+.paneles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; }
+.panel { background: var(--superficie); border: 1px solid var(--borde); border-radius: 8px; overflow: hidden;
+  display: flex; flex-direction: column; min-height: 520px; }
+.panel h2 { font-size: 13px; margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--borde);
+  display: flex; gap: 10px; align-items: center; }
+.panel h2 small { margin-left: auto; font-weight: 400; }
+.codigo { flex: 1; overflow: auto; background: var(--editor); font: 13px/1.6 var(--mono); position: relative; }
+.codigo table { border-collapse: collapse; width: 100%; }
+.codigo td { padding: 0 10px; white-space: pre; vertical-align: top; }
+.codigo td.num { color: var(--apagado); text-align: right; background: var(--gutter); width: 1%; user-select: none; }
+.codigo tr.ok td.num { color: var(--verde); } .codigo tr.mal td.num { color: var(--rojo); }
+.codigo tr.ok td.txt { background: var(--verde-fondo); } .codigo tr.mal td.txt { background: var(--rojo-fondo); }
+textarea#fuente { flex: 1; width: 100%; resize: none; border: 0; outline: 0; padding: 10px 14px;
+  background: var(--editor); color: var(--texto); font: 13px/1.6 var(--mono); }
+.err { color: var(--rojo); text-decoration: underline; text-decoration-thickness: 2px; }
+.RESERVADA { color: var(--t-reservada); font-weight: 600; } .IDENTIFICADOR { color: var(--t-identificador); }
+.CODIGO_MATERIA, .GRUPO, .AULA { color: var(--t-entidad); } .DIA { color: var(--t-dia); font-weight: 600; }
+.HORA, .RANGO_HORA, .ENTERO, .REAL { color: var(--t-numero); } .CADENA { color: var(--t-cadena); }
+.OP_RELACIONAL, .ASIGNACION, .DELIMITADOR { color: var(--t-operador); } .COMENTARIO { color: var(--t-comentario); }
+.leyenda { padding: 8px 14px; border-top: 1px solid var(--borde); font-size: 12px; color: var(--tenue);
+  display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.leyenda i { font-style: normal; }
+.pestanas { display: flex; gap: 4px; padding: 8px 10px 0; border-bottom: 1px solid var(--borde); flex-wrap: wrap; }
+.pestanas button { border-radius: 6px 6px 0 0; border-bottom: 0; }
+.pestanas button.activa { background: var(--acento); border-color: var(--acento); font-weight: 600; }
+.vista { display: none; flex: 1; overflow: auto; } .vista.activa { display: block; }
+pre.diag { margin: 0; padding: 12px 14px; font: 12.5px/1.55 var(--mono); white-space: pre-wrap; }
+.diag .tit { color: var(--rojo); font-weight: 700; } .diag .ind { color: var(--rojo); }
+.diag .sug { color: var(--acento-claro); } .diag .ok { color: var(--verde); font-weight: 700; } .diag .tenue { color: var(--tenue); }
+table.datos { border-collapse: collapse; width: 100%; font: 12.5px/1.5 var(--mono); }
+table.datos th { position: sticky; top: 0; background: var(--superficie); text-align: left; padding: 7px 10px;
+  border-bottom: 1px solid var(--borde); font-family: system-ui, sans-serif; font-size: 12px; }
+table.datos td { padding: 5px 10px; border-bottom: 1px solid #0f1726; vertical-align: top; }
+table.datos tr:nth-child(even) td { background: var(--fila-par); }
+td.n { text-align: right; } .vok { color: var(--verde); } .vmal { color: var(--rojo); }
+.resumen { border-top: 1px solid var(--borde); padding: 10px 14px; font: 12.5px/1.5 var(--mono);
+  white-space: pre; overflow: auto; max-height: 170px; color: var(--tenue); }
+.resumen b { color: var(--acento-claro); }
+.nota { color: var(--tenue); font-size: 12px; padding: 10px 14px; margin: 0; }
+footer { color: var(--apagado); font-size: 12px; text-align: center; padding: 18px; }
+footer a { color: var(--acento-claro); }
+#carga { position: fixed; inset: 0; background: rgba(11,15,23,.92); display: flex; align-items: center;
+  justify-content: center; flex-direction: column; gap: 10px; z-index: 9; }
+@media (max-width: 900px) {
+  .paneles { grid-template-columns: 1fr; } .contadores { grid-template-columns: repeat(2, 1fr); }
+  main { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+<div id="carga"><b>Cargando el analizador…</b><span style="color:var(--tenue)">Se descarga Python (Pyodide) la primera vez; puede tardar unos segundos.</span></div>
+<header>
+  <span class="marca">AULA</span>
+  <div><h1>Analizador léxico del lenguaje AULA</h1>
+  <p>Lenguaje para asignar horarios universitarios · AFD, tabla de símbolos con función hash y manejo de errores léxicos</p></div>
+</header>
+<main>
+  <div class="barra">
+    <label class="boton" for="archivo">Seleccionar archivo…</label>
+    <input type="file" id="archivo" accept=".txt,text/plain">
+    <button data-ejemplo="horario_valido.txt">✓ Ejemplo válido</button>
+    <button data-ejemplo="horario_errores.txt">✗ Ejemplo con errores</button>
+    <button id="editar">Editar código</button>
+    <button id="analizar" class="primario" disabled>▶ Analizar</button>
+    <label style="color:var(--tenue);font-size:12px"><input type="checkbox" id="paso" checked> evaluación paso a paso</label>
+    <span id="estado">Elija un archivo o un ejemplo.</span>
+  </div>
+  <div class="contadores">
+    <div class="contador"><b id="c-lineas" style="color:var(--acento-claro)">0</b><span>Líneas analizadas</span></div>
+    <div class="contador"><b id="c-validas" style="color:var(--verde)">0</b><span>Líneas válidas</span></div>
+    <div class="contador"><b id="c-invalidas" style="color:var(--rojo)">0</b><span>Líneas con error</span></div>
+    <div class="contador"><b id="c-errores" style="color:var(--rojo)">0</b><span>Errores léxicos</span></div>
+    <div class="contador"><b id="c-simbolos" style="color:var(--ambar)">0</b><span>Símbolos usados</span></div>
+  </div>
+  <div class="progreso"><div id="barra"></div></div>
+  <div class="paneles">
+    <section class="panel">
+      <h2>Código fuente de entrada <span id="nombre" style="color:var(--tenue);font-weight:400"></span>
+        <small><span class="vok">✓ válida</span> · <span class="vmal">✗ con error</span></small></h2>
+      <div class="codigo" id="codigo"></div>
+      <textarea id="fuente" spellcheck="false" hidden></textarea>
+      <div class="leyenda">
+        <span>Estado:</span><i class="vok">■ ✓ correcto</i><i class="vmal">■ ✗ error</i>
+        <span style="margin-left:8px">Tokens:</span><i class="RESERVADA">■ palabra reservada</i><i class="IDENTIFICADOR">■ identificador</i>
+        <i class="AULA">■ materia, grupo, aula</i><i class="DIA">■ día</i><i class="ENTERO">■ número u hora</i>
+        <i class="CADENA">■ cadena</i><i class="DELIMITADOR">■ operador, ;</i><i class="COMENTARIO">■ comentario</i>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="pestanas">
+        <button class="activa" data-vista="diag">Diagnóstico en vivo</button>
+        <button data-vista="errores">Tabla de errores (<span id="n-err">0</span>)</button>
+        <button data-vista="tokens">Tokens (<span id="n-tok">0</span>)</button>
+        <button data-vista="simbolos">Tabla de símbolos</button>
+      </div>
+      <div class="vista activa" id="v-diag"><pre class="diag" id="diag"></pre></div>
+      <div class="vista" id="v-errores"><table class="datos"><thead><tr><th>Línea</th><th>Col</th><th>Código</th><th>Lexema</th><th>Descripción y token esperado</th></tr></thead><tbody id="t-errores"></tbody></table></div>
+      <div class="vista" id="v-tokens"><table class="datos"><thead><tr><th>Línea</th><th>Col</th><th>Tipo de token</th><th>Lexema</th><th>Estado de la línea</th><th>Índice</th></tr></thead><tbody id="t-tokens"></tbody></table></div>
+      <div class="vista" id="v-simbolos">
+        <p class="nota" id="stats"></p>
+        <p class="nota">Índice: posición en la tabla hash, hash(lexema) % capacidad; los lexemas con el mismo índice (colisión) aparecen en filas seguidas.
+        Lexema: texto del archivo · Token: tipo reconocido por el AFD · Categoría: clase del token · Línea: primera aparición · Apariciones: cuántas veces aparece.</p>
+        <table class="datos"><thead><tr><th>Índice</th><th>Lexema</th><th>Token</th><th>Categoría</th><th>Línea</th><th>Apariciones</th></tr></thead><tbody id="t-simbolos"></tbody></table>
+      </div>
+      <div class="resumen" id="resumen">Resumen de errores: sin análisis.</div>
+    </section>
+  </div>
+</main>
+<footer>El análisis lo hace el mismo código Python del proyecto (paquete <code>aula</code>), ejecutado en el navegador con Pyodide.
+  · <a href="https://github.com/zSamir015/analizador-aula">Código fuente</a></footer>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+const MODULOS = ["__init__", "afd", "automatas", "lexico", "manejador_errores", "tabla_simbolos", "tokens", "validador"];
+const $ = (id) => document.getElementById(id);
+let py, texto = "", resultado = null, editando = false;
+
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+async function iniciar() {
+  py = await loadPyodide();
+  py.FS.mkdir("/app"); py.FS.mkdir("/app/aula");
+  for (const m of MODULOS) {
+    const r = await fetch(`aula/${m}.py`);
+    py.FS.writeFile(`/app/aula/${m}.py`, await r.text());
+  }
+  py.FS.writeFile("/app/puente.py", await (await fetch("puente.py")).text());
+  py.runPython("import sys; sys.path.insert(0, '/app'); import puente");
+  $("carga").remove();
+  // ?ejemplo=valido | errores carga ese ejemplo y lo analiza al abrir la página
+  const pedido = new URLSearchParams(location.search).get("ejemplo");
+  const nombre = pedido === "errores" ? "horario_errores.txt" : "horario_valido.txt";
+  await cargarEjemplo(nombre);
+  if (pedido) await analizar();
+}
+
+async function cargarEjemplo(nombre) {
+  const r = await fetch(`ejemplos/${nombre}`);
+  ponerTexto(py.globals.get("puente").decodificar(new Uint8Array(await r.arrayBuffer())), nombre);
+}
+
+function ponerTexto(t, nombre) {
+  texto = t.replace(/\r\n?/g, "\n"); resultado = null; salirEdicion();
+  $("nombre").textContent = nombre ? "· " + nombre : "";
+  $("analizar").disabled = false; limpiar(); pintarCodigo();
+  $("estado").textContent = "Archivo cargado. Pulse Analizar.";
+}
+
+// Resaltado del código: usa los tokens y errores del análisis si ya existe
+function pintarCodigo(hasta = Infinity) {
+  const porLinea = {};
+  if (resultado) for (const l of resultado.lineas) if (l.numero <= hasta) porLinea[l.numero] = l;
+  const filas = texto.split("\n").map((linea, i) => {
+    const n = i + 1, r = porLinea[n];
+    let cls = "", html;
+    if (r) {
+      cls = r.valida ? "ok" : "mal";
+      const marcas = [];
+      for (const t of r.tokens) marcas.push([t.columna - 1, t.columna - 1 + t.lexema.length, t.tipo]);
+      for (const e of r.errores) marcas.push([e.columna - 1, e.columna - 1 + Math.max(e.lexema.length, 1), "err"]);
+      marcas.sort((a, b) => a[0] - b[0]);
+      html = ""; let pos = 0;
+      for (const [a, b, c] of marcas) {
+        if (a < pos) continue;
+        html += esc(linea.slice(pos, a)) + `<span class="${c}">${esc(linea.slice(a, b))}</span>`; pos = b;
+      }
+      const resto = linea.slice(pos), h = resto.indexOf("#");
+      html += h >= 0 ? esc(resto.slice(0, h)) + `<span class="COMENTARIO">${esc(resto.slice(h))}</span>` : esc(resto);
+    } else {
+      const h = linea.indexOf("#");
+      html = h >= 0 && linea.trim().startsWith("#") ? `<span class="COMENTARIO">${esc(linea)}</span>` : esc(linea);
+    }
+    const marca = r ? (r.valida ? "✓ " : "✗ ") : "";
+    return `<tr class="${cls}"><td class="num">${marca}${n}</td><td class="txt">${html || " "}</td></tr>`;
+  });
+  $("codigo").innerHTML = `<table>${filas.join("")}</table>`;
+}
+
+function limpiar() {
+  for (const id of ["diag", "t-errores", "t-tokens", "t-simbolos"]) $(id).innerHTML = "";
+  for (const id of ["c-lineas", "c-validas", "c-invalidas", "c-errores", "c-simbolos", "n-err", "n-tok"]) $(id).textContent = "0";
+  $("barra").style.width = "0"; $("stats").textContent = ""; $("resumen").textContent = "Resumen de errores: sin análisis.";
+}
+
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function analizar() {
+  if (editando) { texto = $("fuente").value; salirEdicion(); }
+  $("analizar").disabled = true; limpiar();
+  resultado = JSON.parse(py.globals.get("puente").analizar(texto));
+  const L = resultado.lineas; let validas = 0, errores = 0, tokens = 0;
+  const diag = $("diag"), te = $("t-errores"), tt = $("t-tokens");
+  for (let i = 0; i < L.length; i++) {
+    const r = L[i];
+    $("estado").textContent = `Procesando línea ${r.numero}…`;
+    if (r.valida) {
+      validas++;
+      diag.insertAdjacentHTML("beforeend", `<span class="ok">✓ Línea ${r.numero}</span><span class="tenue">  ${r.tokens.length} tokens │ ${esc(r.texto.trim())}</span>\n`);
+    }
+    for (const e of r.errores) {               // cada error se muestra al detectarse
+      errores++;
+      const partes = e.formato.split("\n").map((l, k) =>
+        k === 0 ? `<span class="tit">${esc(l)}</span>` :
+        /^\s*\|?\s*\^+$/.test(l.replace(/^\s+\|/, "")) && l.includes("^") ? `<span class="ind">${esc(l)}</span>` :
+        l.trim().startsWith("Sugerencia:") ? `<span class="sug">${esc(l)}</span>` : esc(l));
+      diag.insertAdjacentHTML("beforeend", partes.join("\n") + "\n\n");
+      te.insertAdjacentHTML("beforeend", `<tr><td class="n">${e.linea}</td><td class="n">${e.columna}</td><td class="vmal">${e.codigo}</td><td>${esc(e.lexema || "—")}</td><td>${esc(e.descripcion)} — se esperaba ${esc(e.esperado)}</td></tr>`);
+    }
+    for (const t of r.tokens) {
+      tokens++;
+      tt.insertAdjacentHTML("beforeend", `<tr><td class="n">${t.linea}</td><td class="n">${t.columna}</td><td class="${t.tipo}">${t.tipo}</td><td class="${t.tipo}">${esc(t.lexema)}</td><td class="${r.valida ? "vok" : "vmal"}">${r.valida ? "✓ válida" : "✗ con error"}</td><td class="n">${t.indice}</td></tr>`);
+    }
+    $("c-lineas").textContent = i + 1; $("c-validas").textContent = validas;
+    $("c-invalidas").textContent = i + 1 - validas; $("c-errores").textContent = errores;
+    $("n-err").textContent = errores; $("n-tok").textContent = tokens;
+    $("barra").style.width = `${((i + 1) / L.length) * 100}%`;
+    pintarCodigo(r.numero);
+    if ($("paso").checked) { diag.parentElement.scrollTop = diag.parentElement.scrollHeight; await espera(120); }
+  }
+  const st = resultado.estadisticas;
+  $("c-simbolos").textContent = resultado.simbolos.length;
+  $("t-simbolos").innerHTML = resultado.simbolos.map((s) =>
+    `<tr><td class="n">${s.indice}</td><td class="${s.tipo}">${esc(s.lexema)}</td><td class="${s.tipo}">${s.tipo}</td><td>${s.categoria}</td><td class="n">${s.linea}</td><td class="n">${s.veces}</td></tr>`).join("");
+  $("stats").textContent = `${resultado.simbolos.length} símbolos usados (${st.simbolos} instalados) · capacidad ${st.capacidad} · factor de carga ${st.factor_carga} · colisiones ${st.colisiones} · redimensiones ${st.redimensiones}`;
+  const res = resultado.resumen.split("\n");
+  $("resumen").innerHTML = `<b>${esc(res[0])}</b>\n${esc(res.slice(1).join("\n"))}`;
+  $("estado").textContent = errores ? `Análisis finalizado con ${errores} error(es).` : "Análisis finalizado sin errores.";
+  $("analizar").disabled = false;
+}
+
+function entrarEdicion() {
+  editando = true; $("fuente").value = texto; $("fuente").hidden = false; $("codigo").hidden = true;
+  $("editar").textContent = "Ver resaltado"; $("analizar").disabled = false; $("fuente").focus();
+}
+function salirEdicion() {
+  if (editando) texto = $("fuente").value;
+  editando = false; $("fuente").hidden = true; $("codigo").hidden = false; $("editar").textContent = "Editar código";
+}
+
+$("editar").onclick = () => { if (editando) { salirEdicion(); resultado = null; limpiar(); pintarCodigo(); } else entrarEdicion(); };
+$("analizar").onclick = analizar;
+document.querySelectorAll("[data-ejemplo]").forEach((b) => b.onclick = () => cargarEjemplo(b.dataset.ejemplo));
+$("archivo").onchange = async (ev) => {
+  const f = ev.target.files[0]; if (!f) return;
+  ponerTexto(py.globals.get("puente").decodificar(new Uint8Array(await f.arrayBuffer())), f.name);
+  ev.target.value = "";
+};
+document.querySelectorAll(".pestanas button").forEach((b) => b.onclick = () => {
+  document.querySelectorAll(".pestanas button").forEach((x) => x.classList.toggle("activa", x === b));
+  document.querySelectorAll(".vista").forEach((v) => v.classList.toggle("activa", v.id === "v-" + b.dataset.vista));
+});
+iniciar().catch((e) => { $("carga").innerHTML = `<b>No se pudo cargar el analizador.</b><span>${esc(String(e))}</span>`; });
+</script>
+</body>
+</html>
