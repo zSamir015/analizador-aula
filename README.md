@@ -6,15 +6,18 @@ definir horarios universitarios.
 
 Este repositorio cubre la Etapa 1 (definición del lenguaje) y los puntos 2
 (validación de cadenas), 3 (tabla de símbolos con función hash) y 4 (manejador
-de errores) de la Etapa 2. La interfaz de usuario (punto 5) y la solicitud del
-archivo (punto 6) se integran sobre la API descrita abajo.
+de errores) de la Etapa 2. `interfaz.py` es la interfaz de usuario (punto 5):
+pide el archivo de entrada (punto 6), muestra los errores mientras se evalúa y
+permite ver la tabla de símbolos.
 
-Requiere Python 3.10 o superior. No tiene dependencias externas.
+Requiere Python 3.10 o superior con Tkinter (incluido en el instalador de
+python.org). No tiene dependencias externas.
 
 ## Uso
 
 ```bash
-python3 demo.py                              # pide la ruta del archivo
+python3 interfaz.py                          # interfaz gráfica
+python3 demo.py                              # consola, pide la ruta del archivo
 python3 demo.py ejemplos/horario_valido.txt
 python3 demo.py ejemplos/horario_errores.txt
 python3 -m unittest discover -s tests -t .
@@ -23,7 +26,8 @@ python3 -m unittest discover -s tests -t .
 ## El lenguaje
 
 Cada línea del archivo de entrada es una cadena y termina en `;`. Las líneas
-vacías y los comentarios (`# ...`) se ignoran.
+vacías y los comentarios (`# ...`) se ignoran. El archivo puede estar en UTF-8
+(con o sin BOM) o en ANSI (cp1252, el formato del Bloc de notas de Windows).
 
 ```
 entero max_creditos = 18;

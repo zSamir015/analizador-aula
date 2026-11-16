@@ -121,7 +121,7 @@ class InterfazAULA:
         self.resultados = tk.Text(
             marco_resultados,
             wrap="word",
-            font=("Consolas", 10),
+            font="TkFixedFont",
             padx=10,
             pady=10
         )
@@ -155,7 +155,7 @@ class InterfazAULA:
         )
         self.resultados.tag_configure(
             "titulo",
-            font=("Consolas", 10, "bold")
+            font=("TkFixedFont", 10, "bold")
         )
 
         # Resumen
@@ -180,7 +180,7 @@ class InterfazAULA:
         self.resumen_texto = tk.Text(
             marco_resumen,
             wrap="none",
-            font=("Consolas", 10),
+            font="TkFixedFont",
             height=7,
             padx=8,
             pady=8
@@ -474,7 +474,7 @@ class InterfazAULA:
         contenido = tk.Text(
             marco,
             wrap="none",
-            font=("Consolas", 10),
+            font="TkFixedFont",
             padx=10,
             pady=10
         )

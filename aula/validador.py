@@ -45,7 +45,28 @@ def analizar_lineas(lineas):
         yield analizar_cadena(texto, numero)
 
 
-def analizar_archivo(ruta, encoding="utf-8"):
+CODIFICACIONES = ("utf-8-sig", "cp1252")
+
+
+def leer_archivo(ruta, encoding=None):
+    """Devuelve el texto del archivo.
+
+    Sin ``encoding`` se prueba UTF-8 (con o sin BOM) y, si falla, cp1252, que
+    es como guarda el Bloc de notas de Windows en modo ANSI.
+    """
+    with open(ruta, "rb") as archivo:
+        datos = archivo.read()
+    if encoding:
+        return datos.decode(encoding)
+    for codificacion in CODIFICACIONES[:-1]:
+        try:
+            return datos.decode(codificacion)
+        except UnicodeDecodeError:
+            pass
+    return datos.decode(CODIFICACIONES[-1], errors="replace")
+
+
+def analizar_archivo(ruta, encoding=None):
     """Generador: analiza el archivo línea por línea (permite mostrar el avance)."""
-    with open(ruta, encoding=encoding) as archivo:
-        yield from analizar_lineas(archivo)
+    texto = leer_archivo(ruta, encoding).replace("\r\n", "\n").replace("\r", "\n")
+    yield from analizar_lineas(texto.split("\n"))

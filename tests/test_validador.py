@@ -1,4 +1,5 @@
 import os
+import tempfile
 import unittest
 
 from aula import analizar_archivo, analizar_cadena
@@ -115,6 +116,28 @@ class TestArchivos(unittest.TestCase):
         from aula import analizar_lineas
         resultados = list(analizar_lineas(["", "  # nota", "grupo 1IL142;"]))
         self.assertEqual([r.numero for r in resultados], [3])
+
+
+class TestCodificacion(unittest.TestCase):
+    def analizar_bytes(self, datos):
+        with tempfile.NamedTemporaryFile("wb", suffix=".txt", delete=False) as f:
+            f.write(datos)
+        self.addCleanup(os.remove, f.name)
+        return list(analizar_archivo(f.name))
+
+    def test_utf8_con_bom(self):
+        r = self.analizar_bytes("\ufeffgrupo 1IL142;\n".encode("utf-8"))
+        self.assertTrue(r[0].valida, r[0].errores)
+
+    def test_ansi_windows(self):
+        r = self.analizar_bytes('profesor samaniego "Nicolás Samaniego";\r\n'.encode("cp1252"))
+        self.assertTrue(r[0].valida, r[0].errores)
+        self.assertEqual(r[0].tokens[2].lexema, '"Nicolás Samaniego"')
+
+    def test_saltos_de_linea_mixtos(self):
+        r = self.analizar_bytes(b"grupo 1IL142;\r\n\r\ngrupo 1IL143;\rgrupo 2IL101;\n")
+        self.assertEqual([x.numero for x in r], [1, 3, 4])
+        self.assertTrue(all(x.valida for x in r))
 
 
 if __name__ == "__main__":
