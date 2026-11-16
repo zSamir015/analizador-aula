@@ -191,6 +191,18 @@ Cada `Simbolo` guarda `lexema`, `tipo`, `categoria`, `linea`/`columna` de la
 primera aparición y `ocurrencias` (todas las posiciones, `veces` = cuántas).
 Solo información léxica: no guarda tipos de dato, valores ni declaraciones.
 
+Columnas que muestra la tabla (interfaz y `formatear()`):
+
+| Columna | Significado |
+|---|---|
+| Índice hash | cubeta donde se guarda el símbolo: `hash(lexema) % capacidad` |
+| Lexema | texto tal como aparece en el archivo (`LFAC-301`, `samaniego`) |
+| Token | tipo reconocido por el AFD (`CODIGO_MATERIA`, `IDENTIFICADOR`) |
+| Categoría | clase del token: materia, grupo, aula, identificador, literal, operador... |
+| 1.ª aparición | `línea:columna` donde aparece por primera vez |
+| Apariciones | cuántas veces aparece en el archivo |
+| Posiciones | `línea:columna` de todas las apariciones |
+
 ```python
 from aula import TablaSimbolos, analizar_archivo
 

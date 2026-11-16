@@ -1643,12 +1643,23 @@ class InterfazAULA:
 
 class VentanaTabla:
     COLUMNAS = (
-        ("hash", "Cubeta", 75, "e"),
-        ("lexema", "Lexema", 240, "w"),
-        ("tipo", "Tipo", 140, "w"),
-        ("categoria", "Categoría", 140, "w"),
-        ("linea", "Línea", 75, "e"),
-        ("veces", "Veces", 75, "e"),
+        ("hash", "Índice hash", 90, "e"),
+        ("lexema", "Lexema", 200, "w"),
+        ("tipo", "Token", 140, "w"),
+        ("categoria", "Categoría", 130, "w"),
+        ("linea", "1.ª aparición", 100, "center"),
+        ("veces", "Apariciones", 90, "e"),
+        ("posiciones", "Posiciones (línea:columna)", 260, "w"),
+    )
+
+    LEYENDA = (
+        "Índice hash: cubeta donde se guarda (hash % capacidad)   ·   "
+        "Lexema: texto tal como aparece en el archivo   ·   "
+        "Token: tipo reconocido por el AFD   ·   "
+        "Categoría: clase del token (materia, grupo, literal, operador...)\n"
+        "1.ª aparición: línea:columna donde aparece por primera vez   ·   "
+        "Apariciones: cuántas veces aparece   ·   "
+        "Posiciones: todas sus apariciones"
     )
 
     def __init__(self, padre, tabla, archivo, ui):
@@ -1691,7 +1702,15 @@ class VentanaTabla:
             font=ui.f_subtitulo,
             bg=c["superficie"],
             fg=c["tenue"],
-        ).pack(anchor="w", padx=20, pady=(2, 12))
+        ).pack(anchor="w", padx=20, pady=(2, 4))
+        tk.Label(
+            encabezado,
+            text=self.LEYENDA,
+            font=ui.f_subtitulo,
+            bg=c["superficie"],
+            fg=c["tenue"],
+            justify="left",
+        ).pack(anchor="w", padx=20, pady=(0, 12))
 
         # Barra de herramientas: sub-vistas + buscador + filtros
         barra = ttk.Frame(v, padding=(20, 12, 20, 8))
@@ -1802,7 +1821,7 @@ class VentanaTabla:
                 clave,
                 width=ancho,
                 anchor=lado,
-                stretch=(clave == "lexema"),
+                stretch=(clave in ("lexema", "posiciones")),
                 minwidth=55,
             )
         self.arbol.tag_configure("par", background=c["fila_par"])
@@ -1977,8 +1996,9 @@ class VentanaTabla:
                     s.lexema,
                     s.tipo,
                     s.categoria,
-                    s.linea if s.ocurrencias else "—",
+                    f"{s.linea}:{s.columna}" if s.ocurrencias else "—",
                     s.veces,
+                    "  ".join(f"{l}:{c}" for l, c in s.ocurrencias) or "—",
                 ),
             )
 
