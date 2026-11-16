@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AFD Hora: ([01]?[0-9]|2[0-3]):[0-5][0-9]-->
+<structure>
+	<type>fa</type>
+	<automaton>
+		<state id="0" name="h0">
+			<x>136.0</x>
+			<y>172.1</y>
+			<initial/>
+		</state>
+		<state id="1" name="h1">
+			<x>253.1</x>
+			<y>84.6</y>
+		</state>
+		<state id="2" name="h2">
+			<x>253.1</x>
+			<y>172.1</y>
+		</state>
+		<state id="3" name="h3">
+			<x>320.6</x>
+			<y>270.9</y>
+		</state>
+		<state id="4" name="h4">
+			<x>388.1</x>
+			<y>129.6</y>
+		</state>
+		<state id="5" name="h5">
+			<x>489.4</x>
+			<y>167.1</y>
+		</state>
+		<state id="6" name="h6">
+			<x>606.6</x>
+			<y>167.1</y>
+		</state>
+		<state id="7" name="h7">
+			<x>728.8</x>
+			<y>167.1</y>
+			<final/>
+		</state>
+		<transition>
+			<from>0</from>
+			<to>1</to>
+			<read>0-1</read>
+		</transition>
+		<transition>
+			<from>0</from>
+			<to>2</to>
+			<read>2</read>
+		</transition>
+		<transition>
+			<from>0</from>
+			<to>3</to>
+			<read>3-9</read>
+		</transition>
+		<transition>
+			<from>1</from>
+			<to>4</to>
+			<read>0-9</read>
+		</transition>
+		<transition>
+			<from>1</from>
+			<to>5</to>
+			<read>:</read>
+		</transition>
+		<transition>
+			<from>2</from>
+			<to>4</to>
+			<read>0-3</read>
+		</transition>
+		<transition>
+			<from>2</from>
+			<to>5</to>
+			<read>:</read>
+		</transition>
+		<transition>
+			<from>3</from>
+			<to>5</to>
+			<read>:</read>
+		</transition>
+		<transition>
+			<from>4</from>
+			<to>5</to>
+			<read>:</read>
+		</transition>
+		<transition>
+			<from>5</from>
+			<to>6</to>
+			<read>0-5</read>
+		</transition>
+		<transition>
+			<from>6</from>
+			<to>7</to>
+			<read>0-9</read>
+		</transition>
+	</automaton>
+</structure>

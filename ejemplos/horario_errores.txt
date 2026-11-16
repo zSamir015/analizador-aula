@@ -1,0 +1,18 @@
+# Cadenas con errores lexicos y sintacticos
+asignar LFAC-301 a 1IL142 con samaniego en 3-105 SA 7:00-8:30;
+asignar LFAC-301 a 1IL142 con samaniego en 3-105 LU 9:00-7:00;
+asignar LFAC-301 a 1IL142 con samaniego en 3-105 LU 25:70-8:30;
+materia LFAC-30 "Lenguajes" creditos 4;
+grupo 1IL14;
+aula 3-1050 capacidad 40;
+real promedio = 71.;
+entero 9creditos = 18;
+profesor samañego "Nicolas Samaniego";
+texto saludo = "Hola;
+entero Total = 5;
+materia LFAC-301 creditos 4;
+grupo 1IL142
+grupo 1IL142; grupo 1IL143;
+capacidad 40;
+entero max = "dieciocho";
+si max >> 18 entonces mostrar "Exceso";

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AFD Entero: [0-9]+-->
+<structure>
+	<type>fa</type>
+	<automaton>
+		<state id="0" name="q0">
+			<x>136.0</x>
+			<y>138.8</y>
+			<initial/>
+		</state>
+		<state id="1" name="q1">
+			<x>258.1</x>
+			<y>138.8</y>
+			<final/>
+		</state>
+		<transition>
+			<from>0</from>
+			<to>1</to>
+			<read>0-9</read>
+		</transition>
+		<transition>
+			<from>1</from>
+			<to>1</to>
+			<read>0-9</read>
+		</transition>
+	</automaton>
+</structure>
