@@ -42,45 +42,18 @@ class TestTablaSimbolos(unittest.TestCase):
         self.assertEqual(tabla.buscar("1").veces, 2)
         self.assertEqual(sum(1 for s in tabla if s.lexema == "1"), 1)
 
-    def test_atributos_declaracion_variable(self):
-        tabla = tabla_de("entero max = 18;", "texto saludo = \"Hola\";",
-                         "logico ok = verdadero;")
-        self.assertEqual(tabla.buscar("max").atributos["tipo_dato"], "entero")
-        self.assertEqual(tabla.buscar("max").atributos["valor"], 18)
-        self.assertEqual(tabla.buscar("max").categoria, "variable")
-        self.assertEqual(tabla.buscar("saludo").atributos["valor"], "Hola")
-        self.assertIs(tabla.buscar("ok").atributos["valor"], True)
-
-    def test_asignacion_actualiza_valor(self):
-        tabla = tabla_de("entero x = 1;", "x = 5;")
-        self.assertEqual(tabla.buscar("x").atributos["valor"], 5)
-
-    def test_atributos_entidades(self):
-        tabla = tabla_de('materia LFAC-301 "Lenguajes" creditos 4;',
-                         'profesor sam "Nicolas";', "aula 3-105 capacidad 40;",
-                         "grupo 1IL142;")
+    def test_solo_informacion_lexica(self):
+        tabla = tabla_de('materia LFAC-301 "Lenguajes" creditos 4;', "entero max = 18;")
         m = tabla.buscar("LFAC-301")
-        self.assertEqual((m.categoria, m.atributos["nombre"], m.atributos["creditos"]),
-                         ("materia", "Lenguajes", 4))
-        self.assertEqual(tabla.buscar("sam").categoria, "profesor")
-        self.assertEqual(tabla.buscar("3-105").atributos["capacidad"], 40)
-        self.assertTrue(tabla.buscar("1IL142").atributos["declarado"])
+        self.assertEqual((m.tipo, m.categoria), (T.CODIGO_MATERIA, "materia"))
+        self.assertEqual(tabla.buscar("max").categoria, "identificador")
+        self.assertFalse(hasattr(m, "atributos"))
 
-    def test_redeclaracion(self):
-        tabla = tabla_de("entero x = 1;", "entero x = 2;")
-        self.assertEqual(tabla.buscar("x").atributos["redeclaraciones"], 1)
-
-    def test_lineas_invalidas_no_se_instalan(self):
+    def test_lexemas_con_error_no_se_instalan(self):
         tabla = TablaSimbolos()
-        self.assertEqual(tabla.registrar(analizar_cadena("grupo 1IL14;")), 0)
-        self.assertEqual(tabla.registrar(analizar_cadena("entero Total = 5;")), 0)
+        self.assertEqual(tabla.registrar(analizar_cadena("grupo 1IL14;")), 1)  # solo ';'
         self.assertIsNone(tabla.buscar("1IL14"))
-        self.assertEqual(tabla.simbolos_usados(), [])
-
-    def test_literales_con_valor(self):
-        tabla = tabla_de("real r = 71.5;", "hora h = 7:30;")
-        self.assertEqual(tabla.buscar("71.5").atributos["valor"], 71.5)
-        self.assertEqual(tabla.buscar("7:30").atributos["valor"], "7:30")
+        self.assertEqual(tabla.buscar("grupo").veces, 1)
 
     def test_redimensiona_y_conserva_simbolos(self):
         tabla = TablaSimbolos(capacidad=5, precargar=False)
@@ -104,7 +77,7 @@ class TestTablaSimbolos(unittest.TestCase):
         tabla = tabla_de("entero max = 18;")
         texto = tabla.formatear()
         self.assertIn("max", texto)
-        self.assertIn("tipo_dato='entero'", texto)
+        self.assertNotIn("Atributos", texto)
         self.assertNotIn("asignar", texto)
         self.assertIn("asignar", tabla.formatear(incluir_no_usados=True))
 
@@ -127,29 +100,28 @@ class TestManejadorErrores(unittest.TestCase):
         self.assertFalse(m.hay_errores)
         self.assertIn("Sin errores", m.resumen())
 
-    def test_registra_lexicos_y_sintacticos(self):
-        m = self.procesar("grupo 1IL14;", "grupo 1IL142")
-        self.assertEqual([r.codigo for r in m.registros], ["E07", "S03"])
-        self.assertEqual(m.lineas_con_error, [1, 2])
-        self.assertEqual(len(m.por_categoria("LEXICO")), 1)
-        self.assertEqual(len(m.por_categoria("SINTACTICO")), 1)
+    def test_registra_errores_lexicos(self):
+        m = self.procesar("grupo 1IL14;", "grupo 1IL142", "aula 3-1050 capacidad 40;")
+        self.assertEqual([r.codigo for r in m.registros], ["E06", "E09"])
+        self.assertEqual(m.lineas_con_error, [1, 3])
+        self.assertTrue(all(r.categoria == "LEXICO" for r in m.registros))
 
     def test_varios_errores_en_una_linea(self):
         m = self.procesar("asignar LFAC-30 a 1IL14 con sam en 3-105 LU 7:00-8:30;")
-        self.assertEqual([r.codigo for r in m.errores_de_linea(1)], ["E06", "E07"])
+        self.assertEqual([r.codigo for r in m.errores_de_linea(1)], ["E05", "E06"])
 
     def test_suscriptor_recibe_error_al_detectarse(self):
         m = ManejadorErrores()
         recibidos = []
         m.suscribir(lambda reg: recibidos.append((reg.codigo, m.total)))
         m.procesar(analizar_cadena("grupo 1IL14;", 1))
-        self.assertEqual(recibidos, [("E07", 1)])
+        self.assertEqual(recibidos, [("E06", 1)])
 
     def test_formato_con_indicador_de_columna(self):
         m = self.procesar("grupo 1IL14;")
         salida = m.formatear(m.registros[0])
         lineas = salida.splitlines()
-        self.assertIn("[E07]", lineas[0])
+        self.assertIn("E06", lineas[0])
         self.assertIn("grupo 1IL14;", salida)
         texto = next(l for l in lineas if "grupo 1IL14;" in l)
         marca = next(l for l in lineas if "^" in l)
@@ -157,18 +129,17 @@ class TestManejadorErrores(unittest.TestCase):
         self.assertEqual(marca.count("^"), len("1IL14"))
         self.assertIn("Sugerencia:", salida)
 
-    def test_falta_punto_y_coma_apunta_al_final(self):
-        m = self.procesar("grupo 1IL142")
-        reg = m.registros[0]
-        self.assertEqual(reg.codigo, "S03")
-        self.assertEqual(reg.columna, len("grupo 1IL142") + 1)
-        self.assertEqual(m.formatear(reg).splitlines()[-2].index("^"),
-                         m.formatear(reg).splitlines()[-3].index("1IL142") + len("1IL142"))
+    def test_mensaje_explicito(self):
+        m = self.procesar("grupo 1IL14;")
+        salida = m.formatear(m.registros[0])
+        for parte in ("Error léxico E06", "línea 1, columna 7", "Encontrado:  '1IL14'",
+                      "Se esperaba: GRUPO [0-9][A-Z]{2}[0-9]{3}", "Recuperación:", "Sugerencia:"):
+            self.assertIn(parte, salida)
 
     def test_resumen_cuenta_por_codigo(self):
-        m = self.procesar("grupo 1IL14;", "grupo 1IL15;", "grupo 1IL142", "grupo 1IL142;")
-        self.assertEqual(m.conteo_por_codigo(), {"E07": 2, "S03": 1})
-        self.assertIn("3 error(es) en 3 de 4", m.resumen())
+        m = self.procesar("grupo 1IL14;", "grupo 1IL15;", "grupo SA;", "grupo 1IL142;")
+        self.assertEqual(m.conteo_por_codigo(), {"E06": 2, "E08": 1})
+        self.assertIn("3 error(es) léxico(s) en 3 de 4", m.resumen())
 
     def test_codigo_desconocido(self):
         from aula import Error

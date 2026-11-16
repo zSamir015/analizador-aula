@@ -23,7 +23,6 @@ from aula import (
     analizar_archivo,
     analizar_lineas,
 )
-from aula.sintaxis import SENTENCIAS
 from aula.tokens import DIAS, PALABRAS_RESERVADAS, TIPOS_DATO
 from aula.validador import leer_archivo
 
@@ -116,7 +115,7 @@ _RE_PALABRA = re.compile(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b")
 class InterfazAULA:
     def __init__(self, ventana, tema="oscuro"):
         self.ventana = ventana
-        self.ventana.title("AULA — Analizador Léxico y Sintáctico de Horarios")
+        self.ventana.title("AULA — Analizador Léxico del lenguaje de asignación de horarios")
         self.ventana.geometry("1240x800")
         self.ventana.minsize(960, 620)
 
@@ -136,7 +135,7 @@ class InterfazAULA:
         # Estado de diagnóstico enriquecido
         self._resultados_linea = {}   # num_linea -> ResultadoLinea
         self._todos_tokens = []       # [(ResultadoLinea, Token), ...]
-        self._conteo_sentencias = {}  # codigo -> int
+        self._conteo_tokens = {}  # codigo -> int
         self._filtro_consola = "todos"
         self.ventana_tabla = None
 
@@ -371,7 +370,7 @@ class InterfazAULA:
         ruta_prev = self.ruta
         resultados_prev = dict(self._resultados_linea)
         tokens_prev = list(self._todos_tokens)
-        sentencias_prev = dict(self._conteo_sentencias)
+        tokens_tipo_prev = dict(self._conteo_tokens)
         validas_prev = self.validas
         lineas_prev = self.lineas
         total_prev = self.total_lineas
@@ -388,7 +387,7 @@ class InterfazAULA:
         self.ruta = ruta_prev
         self._resultados_linea = resultados_prev
         self._todos_tokens = tokens_prev
-        self._conteo_sentencias = sentencias_prev
+        self._conteo_tokens = tokens_tipo_prev
         self.validas = validas_prev
         self.lineas = lineas_prev
         self.total_lineas = total_prev
@@ -460,7 +459,7 @@ class InterfazAULA:
         ).pack(anchor="w")
         tk.Label(
             titulos,
-            text="Análisis léxico, validación de sentencias, tabla de símbolos y manejo de errores",
+            text="Análisis léxico con AFD, tabla de símbolos y manejo de errores léxicos",
             font=self.f_subtitulo,
             bg=c["superficie"],
             fg=c["tenue"],
@@ -565,9 +564,9 @@ class InterfazAULA:
         self.sub_contadores = {}
         datos = [
             ("lineas", "Líneas analizadas", c["acento_claro"], "Con contenido ejecutable"),
-            ("validas", "Sentencias válidas", c["verde"], "Reconocidas (S1–S11)"),
-            ("invalidas", "Líneas con error", c["rojo"], "Descartadas de la tabla"),
-            ("errores", "Errores reportados", c["rojo"], "0 léxicos · 0 sintácticos"),
+            ("validas", "Líneas válidas", c["verde"], "Sin errores léxicos"),
+            ("invalidas", "Líneas con error", c["rojo"], "Con al menos un error léxico"),
+            ("errores", "Errores reportados", c["rojo"], "0 léxicos"),
             ("simbolos", "Símbolos usados", c["ambar"], "Capacidad 53 · Carga 0.604"),
         ]
         for i, (clave, texto, color, subtexto) in enumerate(datos):
@@ -1039,7 +1038,7 @@ class InterfazAULA:
             ("codigo", "Código", 70, "center"),
             ("categoria", "Categoría", 95, "center"),
             ("lexema", "Lexema", 120, "w"),
-            ("descripcion", "Descripción y sugerencia", 320, "w"),
+            ("descripcion", "Descripción y token esperado", 320, "w"),
         ):
             self.tree_errores.heading(cid, text=tit_c, anchor=al_c)
             self.tree_errores.column(
@@ -1047,7 +1046,6 @@ class InterfazAULA:
             )
         self.tree_errores.tag_configure("par", background=c["fila_par"])
         self.tree_errores.tag_configure("LEXICO", foreground=c["rojo"])
-        self.tree_errores.tag_configure("SINTACTICO", foreground=c["ambar"])
         self.tree_errores.grid(row=0, column=0, sticky="nsew")
 
         sv_e = ttk.Scrollbar(v_errores, orient="vertical", command=self.tree_errores.yview)
@@ -1094,7 +1092,7 @@ class InterfazAULA:
         ent_tok.pack(side="left", ipady=3, ipadx=5)
         self.filtro_token_var.trace_add("write", lambda *_: self._llenar_tabla_tokens())
 
-        cols_t = ("linea", "columna", "tipo", "lexema", "sentencia", "hash")
+        cols_t = ("linea", "columna", "tipo", "lexema", "estado", "hash")
         self.tree_tokens = ttk.Treeview(
             v_tokens, columns=cols_t, show="headings", selectmode="browse"
         )
@@ -1103,7 +1101,7 @@ class InterfazAULA:
             ("columna", "Col", 55, "e"),
             ("tipo", "Tipo de token", 150, "w"),
             ("lexema", "Lexema", 200, "w"),
-            ("sentencia", "Sentencia", 85, "center"),
+            ("estado", "Línea", 85, "center"),
             ("hash", "Cubeta", 70, "e"),
         ):
             self.tree_tokens.heading(cid, text=tit_c, anchor=al_c)
@@ -1199,7 +1197,6 @@ class InterfazAULA:
             if busq and (
                 busq not in tok.lexema.lower()
                 and busq not in tok.tipo.lower()
-                and busq not in (res.sentencia or "").lower()
             ):
                 continue
             tags = ("par",) if fila % 2 else ()
@@ -1212,7 +1209,7 @@ class InterfazAULA:
                     tok.columna,
                     tok.tipo,
                     tok.lexema,
-                    res.sentencia if res.valida else "—",
+                    "válida" if res.valida else "con error",
                     self.tabla.indice(tok.lexema),
                 ),
             )
@@ -1238,7 +1235,6 @@ class InterfazAULA:
         usados = len(self.tabla.simbolos_usados())
         est = self.tabla.estadisticas()
         lex = len(self.manejador.por_categoria("LEXICO"))
-        sin = len(self.manejador.por_categoria("SINTACTICO"))
 
         valores = {
             "lineas": self.lineas,
@@ -1252,14 +1248,14 @@ class InterfazAULA:
                 self.contadores[clave].config(text=str(valor))
 
         if "errores" in self.sub_contadores:
-            self.sub_contadores["errores"].config(text=f"{lex} léxicos · {sin} sintácticos")
+            self.sub_contadores["errores"].config(text=f"{lex} léxicos")
         if "simbolos" in self.sub_contadores:
             self.sub_contadores["simbolos"].config(
                 text=f"Capacidad {est['capacidad']} · Carga {est['factor_carga']}"
             )
         if "validas" in self.sub_contadores:
             self.sub_contadores["validas"].config(
-                text=f"{len(self._conteo_sentencias)} tipo(s) de sentencia"
+                text=f"{len(self._todos_tokens)} token(s) reconocidos"
             )
 
         self.progreso.configure(maximum=max(self.total_lineas, 1), value=self.lineas)
@@ -1271,14 +1267,14 @@ class InterfazAULA:
         if len(lineas) > 1:
             self.escribir(self.resumen_texto, "\n".join(lineas[1:]) + "\n")
 
-        if self._conteo_sentencias:
+        if self._conteo_tokens:
             res_s = ", ".join(
-                f"{k}: {self._conteo_sentencias[k]}"
-                for k in sorted(self._conteo_sentencias, key=lambda x: int(x[1:]))
+                f"{k}: {self._conteo_tokens[k]}"
+                for k in sorted(self._conteo_tokens)
             )
             self.escribir(
                 self.resumen_texto,
-                f"\nSentencias válidas por tipo: {res_s}\n",
+                f"\nTokens reconocidos por tipo: {res_s}\n",
                 "tenue",
             )
 
@@ -1322,7 +1318,7 @@ class InterfazAULA:
         self.ruta = ruta
         self._resultados_linea.clear()
         self._todos_tokens.clear()
-        self._conteo_sentencias.clear()
+        self._conteo_tokens.clear()
         self.validas = 0
         self.lineas = 0
 
@@ -1382,7 +1378,7 @@ class InterfazAULA:
         self.limpiar(self.resumen_texto)
         self._resultados_linea.clear()
         self._todos_tokens.clear()
-        self._conteo_sentencias.clear()
+        self._conteo_tokens.clear()
         self.tree_errores.delete(*self.tree_errores.get_children())
         self.tree_tokens.delete(*self.tree_tokens.get_children())
         self._botones_tab["errores"].configure(text="Tabla de errores (0)")
@@ -1434,12 +1430,12 @@ class InterfazAULA:
             # Detectar y comunicar errores (invoca mostrar_error por cada uno)
             self.manejador.procesar(resultado)
 
+            # Todo token reconocido entra a la tabla, aunque la línea tenga errores
+            self.tabla.registrar(resultado)
+            for tok in resultado.tokens:
+                self._conteo_tokens[tok.tipo] = self._conteo_tokens.get(tok.tipo, 0) + 1
             if resultado.valida:
-                self.tabla.registrar(resultado)
                 self.validas += 1
-                self._conteo_sentencias[resultado.sentencia] = (
-                    self._conteo_sentencias.get(resultado.sentencia, 0) + 1
-                )
                 if self._filtro_consola in ("todos", "validas"):
                     self._escribir_linea_valida(resultado)
                 self.editor_codigo.tag_add(
@@ -1471,7 +1467,7 @@ class InterfazAULA:
                         tok.columna,
                         tok.tipo,
                         tok.lexema,
-                        resultado.sentencia if resultado.valida else "—",
+                        "válida" if resultado.valida else "con error",
                         self.tabla.indice(tok.lexema),
                     ),
                 )
@@ -1496,7 +1492,7 @@ class InterfazAULA:
         self.escribir(self.resultados, f"✓ Línea {resultado.numero:<4}", "valido")
         self.escribir(
             self.resultados,
-            f"{resultado.sentencia:<4} {SENTENCIAS.get(resultado.sentencia, '')}   │ {resultado.texto.strip()}\n",
+            f"{len(resultado.tokens):>2} tokens   │ {resultado.texto.strip()}\n",
             "valido_detalle",
         )
 
@@ -1542,7 +1538,7 @@ class InterfazAULA:
                 e.codigo,
                 e.categoria,
                 e.lexema or "—",
-                f"{e.descripcion} — {e.mensaje}",
+                f"{e.descripcion} — se esperaba {e.esperado}",
             ),
         )
         self._botones_tab["errores"].configure(
@@ -1587,7 +1583,7 @@ class InterfazAULA:
                     e.codigo,
                     e.categoria,
                     e.lexema or "—",
-                    f"{e.descripcion} — {e.mensaje}",
+                    f"{e.descripcion} — se esperaba {e.esperado}",
                 ),
             )
         self._llenar_tabla_tokens()
@@ -1653,7 +1649,6 @@ class VentanaTabla:
         ("categoria", "Categoría", 140, "w"),
         ("linea", "Línea", 75, "e"),
         ("veces", "Veces", 75, "e"),
-        ("atributos", "Atributos semánticos", 360, "w"),
     )
 
     def __init__(self, padre, tabla, archivo, ui):
@@ -1807,7 +1802,7 @@ class VentanaTabla:
                 clave,
                 width=ancho,
                 anchor=lado,
-                stretch=(clave in ("lexema", "atributos")),
+                stretch=(clave == "lexema"),
                 minwidth=55,
             )
         self.arbol.tag_configure("par", background=c["fila_par"])
@@ -1917,17 +1912,13 @@ class VentanaTabla:
             fijo = s.tipo in ("RESERVADA", "DIA")
             if fijo and not self.reservadas.get():
                 continue
-            attrs = ", ".join(
-                f"{k}={v!r}" for k, v in s.atributos.items() if k != "linea_declaracion"
-            )
             if texto and (
                 texto not in s.lexema.lower()
                 and texto not in s.tipo.lower()
                 and texto not in s.categoria.lower()
-                and texto not in attrs.lower()
             ):
                 continue
-            filas_datos.append((s, fijo, attrs))
+            filas_datos.append((s, fijo))
 
         # Orden por defecto: declaraciones/entidades primero si no se eligió columna
         prioridad = {
@@ -1935,7 +1926,6 @@ class VentanaTabla:
             "profesor": 1,
             "aula": 2,
             "grupo": 3,
-            "variable": 4,
             "identificador": 5,
             "literal": 6,
             "día": 7,
@@ -1966,10 +1956,10 @@ class VentanaTabla:
             elif col == "veces":
                 clave_fn = lambda item: item[0].veces
             else:
-                clave_fn = lambda item: item[2]
+                clave_fn = lambda item: item[0].lexema
             filas_datos.sort(key=clave_fn, reverse=self._orden_desc)
 
-        for fila, (s, fijo, attrs) in enumerate(filas_datos):
+        for fila, (s, fijo) in enumerate(filas_datos):
             tags = ["par"] if fila % 2 else []
             if fijo:
                 tags.append("reservada")
@@ -1989,7 +1979,6 @@ class VentanaTabla:
                     s.categoria,
                     s.linea if s.ocurrencias else "—",
                     s.veces,
-                    attrs,
                 ),
             )
 

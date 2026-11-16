@@ -1,8 +1,10 @@
-"""API pública del analizador.
+"""API pública del analizador léxico.
 
 Cada línea del archivo es una cadena de entrada. Las líneas vacías y las que
-solo contienen un comentario se omiten. Si una línea tiene errores léxicos no
-se analiza su sintaxis, para no reportar errores en cascada.
+solo contienen un comentario se omiten. Una línea es válida si todos sus
+lexemas pertenecen a algún token (no tiene errores léxicos). El orden de los
+tokens no se revisa: eso corresponde al análisis sintáctico, que no forma
+parte de esta etapa.
 
 Uso:
 
@@ -12,13 +14,12 @@ Uso:
         resultado.numero     # número de línea
         resultado.texto      # texto original
         resultado.tokens     # list[Token] -> lexema, tipo, linea, columna
-        resultado.errores    # list[Error] -> codigo, categoria, mensaje, linea, columna, lexema
-        resultado.sentencia  # "S1".."S11" si la línea es válida
-        resultado.valida     # True si no hay errores
+        resultado.errores    # list[Error] -> codigo, mensaje, linea, columna, lexema,
+                             #               esperado, recuperacion
+        resultado.valida     # True si no hay errores léxicos
 """
 
 from .lexico import analizar_linea
-from .sintaxis import analizar_sentencia
 from .tokens import ResultadoLinea
 
 
@@ -26,14 +27,7 @@ def analizar_cadena(texto, numero=1):
     """Analiza una cadena (una línea) y devuelve un ResultadoLinea."""
     texto = texto.rstrip("\r\n")
     tokens, errores = analizar_linea(texto, numero)
-    resultado = ResultadoLinea(numero, texto, tokens, errores)
-    if not errores and tokens:
-        sentencia, error = analizar_sentencia(tokens, numero, len(texto))
-        if error:
-            resultado.errores.append(error)
-        else:
-            resultado.sentencia = sentencia
-    return resultado
+    return ResultadoLinea(numero, texto, tokens, errores)
 
 
 def analizar_lineas(lineas):

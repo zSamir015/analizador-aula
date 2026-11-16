@@ -1,9 +1,9 @@
-# Horario del grupo 1IL142 - segundo semestre
-entero max_creditos = 18;
-real nota_minima = 71.0;
+# Asignacion de horarios del grupo 1IL142 - II semestre 2026
+entero max_horas_dia = 6;
 texto periodo = "II Semestre 2026";
 logico publicado = falso;
 hora inicio_jornada = 7:00;
+real duracion_bloque = 1.5;
 
 materia LFAC-301 "Lenguajes Formales, Automatas y Compiladores" creditos 4;
 materia SO-302 "Sistemas Operativos" creditos 4;
@@ -17,8 +17,8 @@ asignar LFAC-301 a 1IL142 con samaniego en 3-105 LU 7:00-8:30;
 asignar LFAC-301 a 1IL142 con samaniego en 3-105 MI 7:00-8:30;
 asignar SO-302 a 1IL142 con esquivel en 12-201 MA 9:00-10:30;
 verificar choque 1IL142;
-creditos_grupo = 8;
-si creditos_grupo > max_creditos o publicado == verdadero entonces mostrar "Revisar carga";
+horas_lunes = 3;
+si horas_lunes > max_horas_dia o publicado == verdadero entonces mostrar "Revisar horario";
 mostrar horario de 1IL142;
 eliminar SO-302 de 1IL142;
 mostrar periodo;

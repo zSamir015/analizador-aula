@@ -1,5 +1,20 @@
 # Cambios
 
+## 2026-11-16 (correcciones de la revisión)
+
+- Alcance limitado a la parte léxica. Se eliminó la validación de sentencias
+  (`aula/sintaxis.py`, errores S01-S04) y el error E05 "rango de horas
+  invertido", que comparaba valores (semántica). Los errores léxicos quedan
+  numerados E01-E10.
+- La tabla de símbolos ya no guarda atributos semánticos (tipo de dato, valor,
+  declarado, créditos, capacidad). Instala todo token reconocido, también en
+  líneas con errores.
+- El manejador de errores informa para cada error: ubicación, lexema
+  encontrado, token esperado (expresión regular), línea subrayada, cómo se
+  recuperó el analizador y sugerencia.
+- El lenguaje se delimita a asignación de horarios (no matrícula). Ejemplos sin
+  variables de créditos ni notas.
+
 ## 2026-11-15 (revisión y entrega)
 
 ### Analizador

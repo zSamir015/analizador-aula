@@ -40,64 +40,48 @@ class TestLexico(unittest.TestCase):
             'texto t = "Hola;': "E02",
             "real n = 71.;": "E03",
             "hora h = 25:70;": "E04",
-            "asignar LFAC-301 a 1IL142 con s en 3-105 LU 9:00-7:00;": "E05",
-            "materia LFAC-30 \"X\" creditos 4;": "E06",
-            "grupo 1IL14;": "E07",
-            "entero 9creditos = 1;": "E08",
-            "entero Total = 1;": "E08",
-            "asignar LFAC-301 a 1IL142 con s en 3-105 SA 7:00-8:30;": "E09",
-            "aula 3-1050 capacidad 40;": "E10",
-            "entero " + "a" * 32 + " = 1;": "E11",
+            "materia LFAC-30 \"X\" creditos 4;": "E05",
+            "grupo 1IL14;": "E06",
+            "entero 9creditos = 1;": "E07",
+            "entero Total = 1;": "E07",
+            "asignar LFAC-301 a 1IL142 con s en 3-105 SA 7:00-8:30;": "E08",
+            "aula 3-1050 capacidad 40;": "E09",
+            "entero " + "a" * 32 + " = 1;": "E10",
         }
         for texto, esperado in casos.items():
             self.assertEqual(codigos(texto), [esperado], texto)
 
     def test_varios_errores_en_una_linea(self):
         self.assertEqual(codigos("asignar LFAC-30 a 1IL14 con s en 3-105 SA 7:00-8:30;"),
-                         ["E06", "E07", "E09"])
+                         ["E05", "E06", "E08"])
+
+    def test_errores_informan_esperado_y_recuperacion(self):
+        e = analizar_cadena("grupo 1IL14;").errores[0]
+        self.assertIn("[0-9][A-Z]{2}[0-9]{3}", e.esperado)
+        self.assertIn("columna 12", e.recuperacion)
+
+    def test_recupera_y_sigue_reconociendo(self):
+        r = analizar_cadena("grupo 1IL14 1IL142;")
+        self.assertEqual([t.lexema for t in r.tokens], ["grupo", "1IL142", ";"])
 
 
-class TestSintaxis(unittest.TestCase):
-    def test_sentencias_validas(self):
-        casos = {
-            "entero max_creditos = 18;": "S1",
-            "real nota = 71;": "S1",
-            "logico ok = verdadero;": "S1",
-            "hora h = 7:00;": "S1",
-            'materia LFAC-301 "Lenguajes" creditos 4;': "S2",
-            'profesor samaniego "Nicolas Samaniego";': "S3",
-            "aula 3-105 capacidad 40;": "S4",
-            "grupo 1IL142;": "S5",
-            "asignar LFAC-301 a 1IL142 con samaniego en 3-105 LU 7:00-8:30;": "S6",
-            "eliminar LFAC-301 de 1IL142;": "S7",
-            "verificar choque 1IL142;": "S8",
-            "mostrar horario de 1IL142;": "S9",
-            'mostrar "Hola";': "S9",
-            'si x > 18 y y_ok == verdadero o h < 7:00 entonces mostrar "Aviso";': "S10",
-            "creditos_grupo = 8;": "S11",
-        }
-        for texto, esperado in casos.items():
-            r = analizar_cadena(texto)
-            self.assertTrue(r.valida, f"{texto}: {[str(e) for e in r.errores]}")
-            self.assertEqual(r.sentencia, esperado, texto)
+class TestSoloLexico(unittest.TestCase):
+    """El analizador no revisa sintaxis ni semántica."""
 
-    def test_errores_sintacticos(self):
-        casos = {
-            "capacidad 40;": "S01",
-            "18;": "S01",
-            "materia LFAC-301 creditos 4;": "S02",
-            'entero max = "dieciocho";': "S02",
-            "asignar LFAC-301 a 1IL142 con samaniego en 3-105 7:00-8:30 LU;": "S02",
-            "mostrar horario 1IL142;": "S02",
-            "verificar choque": "S02",
-            "grupo 1IL142": "S03",
-            "grupo 1IL142; grupo 1IL143;": "S04",
-        }
-        for texto, esperado in casos.items():
-            self.assertEqual(codigos(texto), [esperado], texto)
+    def test_orden_de_tokens_no_se_valida(self):
+        for texto in ("capacidad 40;", "grupo 1IL142", "; grupo grupo",
+                      "asignar LFAC-301 a 1IL142 con s en 3-105 7:00-8:30 LU;",
+                      "si max >> 18 entonces mostrar x;"):
+            self.assertTrue(analizar_cadena(texto).valida, texto)
 
-    def test_error_lexico_omite_sintaxis(self):
-        self.assertEqual(codigos("grupo 1IL14"), ["E07"])
+    def test_valores_no_se_validan(self):
+        self.assertTrue(analizar_cadena("entero max = \"dieciocho\";").valida)
+        r = analizar_cadena("asignar LFAC-301 a 1IL142 con s en 3-105 LU 9:00-7:00;")
+        self.assertTrue(r.valida)
+        self.assertEqual(r.tokens[-2].tipo, T.RANGO_HORA)
+
+    def test_resultado_sin_sentencia(self):
+        self.assertFalse(hasattr(analizar_cadena("grupo 1IL142;"), "sentencia"))
 
 
 class TestArchivos(unittest.TestCase):

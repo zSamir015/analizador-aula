@@ -42,25 +42,21 @@ TIPOS_DATO = frozenset({"entero", "real", "texto", "logico", "hora"})
 LONGITUD_MAX_IDENTIFICADOR = 31
 
 LEXICO = "LEXICO"
-SINTACTICO = "SINTACTICO"
 
-# Catálogo de errores: código -> (categoría, descripción)
+# Catálogo de errores léxicos: código -> (categoría, descripción, lo que se esperaba)
 ERRORES = {
-    "E01": (LEXICO, "Carácter no válido"),
-    "E02": (LEXICO, "Cadena sin cerrar"),
-    "E03": (LEXICO, "Número mal formado"),
-    "E04": (LEXICO, "Hora inválida"),
-    "E05": (LEXICO, "Rango de horas invertido"),
-    "E06": (LEXICO, "Código de materia mal formado"),
-    "E07": (LEXICO, "Grupo mal formado"),
-    "E08": (LEXICO, "Identificador mal formado"),
-    "E09": (LEXICO, "Día inválido"),
-    "E10": (LEXICO, "Aula mal formada"),
-    "E11": (LEXICO, "Identificador demasiado largo"),
-    "S01": (SINTACTICO, "Sentencia desconocida"),
-    "S02": (SINTACTICO, "Token inesperado"),
-    "S03": (SINTACTICO, "Falta ';' al final de la sentencia"),
-    "S04": (SINTACTICO, "Tokens sobrantes después de ';'"),
+    "E01": (LEXICO, "Carácter no válido",
+            "un carácter del alfabeto: letras sin tilde ni ñ, dígitos, espacio, ; = < > ! : - . \" #"),
+    "E02": (LEXICO, "Cadena sin cerrar", 'CADENA: "[^"\\n]*" (comilla de cierre en la misma línea)'),
+    "E03": (LEXICO, "Número mal formado", "ENTERO [0-9]+ o REAL [0-9]+\\.[0-9]+"),
+    "E04": (LEXICO, "Hora mal formada",
+            "HORA ([01]?[0-9]|2[0-3]):[0-5][0-9] o RANGO_HORA HORA-HORA"),
+    "E05": (LEXICO, "Código de materia mal formado", "CODIGO_MATERIA [A-Z]{2,4}-[0-9]{3}"),
+    "E06": (LEXICO, "Grupo mal formado", "GRUPO [0-9][A-Z]{2}[0-9]{3}"),
+    "E07": (LEXICO, "Identificador mal formado", "IDENTIFICADOR [a-z_][a-zA-Z0-9_]*"),
+    "E08": (LEXICO, "Día inválido", "DIA LU | MA | MI | JU | VI"),
+    "E09": (LEXICO, "Aula mal formada", "AULA [0-9]{1,2}-[0-9]{3}"),
+    "E10": (LEXICO, "Identificador demasiado largo", "IDENTIFICADOR de 31 caracteres como máximo"),
 }
 
 
@@ -82,6 +78,11 @@ class Error:
     linea: int
     columna: int
     lexema: str = ""
+    recuperacion: str = ""  # qué hizo el analizador para continuar (modo pánico)
+
+    @property
+    def esperado(self):
+        return ERRORES[self.codigo][2]
 
     @property
     def categoria(self):
@@ -102,7 +103,6 @@ class ResultadoLinea:
     texto: str
     tokens: list = field(default_factory=list)
     errores: list = field(default_factory=list)
-    sentencia: str = ""
 
     @property
     def valida(self):

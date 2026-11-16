@@ -1,4 +1,4 @@
-"""Demostración por consola de la validación de cadenas (Etapa 2, punto 2).
+"""Demostración por consola de la validación léxica de cadenas (Etapa 2, punto 2).
 
 Uso:
     python3 demo.py                      # solicita la ruta del archivo
@@ -8,7 +8,6 @@ Uso:
 import sys
 
 from aula import analizar_archivo
-from aula.sintaxis import SENTENCIAS
 
 
 def main():
@@ -21,9 +20,9 @@ def main():
             for tok in r.tokens:
                 print(f"    {tok.tipo:<15} {tok.lexema}")
             for err in r.errores:
-                print(f"    ✗ {err}")
-            sufijo = f" ({r.sentencia}: {SENTENCIAS[r.sentencia]})" if r.valida else ""
-            print(f"  → {estado}{sufijo}")
+                print(f"    ✗ [{err.codigo}] {err.descripcion} en columna {err.columna}: "
+                      f"'{err.lexema}' (se esperaba {err.esperado})")
+            print(f"  → {estado}")
             if r.valida:
                 validas += 1
             else:
