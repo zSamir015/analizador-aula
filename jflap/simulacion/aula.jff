@@ -4,33 +4,33 @@
 	<type>fa</type>
 	<automaton>
 		<state id="0" name="q0">
-			<x>136.0</x>
-			<y>143.7</y>
+			<x>127.5</x>
+			<y>150.9</y>
 			<initial/>
 		</state>
 		<state id="1" name="q1">
-			<x>253.1</x>
-			<y>143.7</y>
+			<x>231.7</x>
+			<y>150.9</y>
 		</state>
 		<state id="2" name="q2">
-			<x>370.3</x>
+			<x>335.8</x>
 			<y>100.0</y>
 		</state>
 		<state id="3" name="q3">
-			<x>472.5</x>
-			<y>143.7</y>
+			<x>426.7</x>
+			<y>150.9</y>
 		</state>
 		<state id="4" name="q4">
-			<x>589.7</x>
-			<y>143.7</y>
+			<x>530.8</x>
+			<y>150.9</y>
 		</state>
 		<state id="5" name="q5">
-			<x>706.9</x>
-			<y>143.7</y>
+			<x>635.0</x>
+			<y>150.9</y>
 		</state>
 		<state id="6" name="q6">
-			<x>829.1</x>
-			<y>143.7</y>
+			<x>743.6</x>
+			<y>150.9</y>
 			<final/>
 		</state>
 		<transition>

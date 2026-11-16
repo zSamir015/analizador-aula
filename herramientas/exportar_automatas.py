@@ -5,8 +5,8 @@
 Las posiciones de los estados en los .jff se toman del layout de Graphviz si
 `dot` está instalado; si no, se usa una distribución lineal.
 
-En jflap/ cada transición muestra la clase de caracteres que lee ("0-9",
-"A-Z", ...), que es lo legible para el documento. JFLAP toma esas etiquetas
+En jflap/ cada transición muestra las clases de caracteres que lee ("0-9",
+"a-z, _", ...), que es lo legible para el documento. JFLAP toma esas etiquetas
 como texto literal, así que además se genera jflap/simulacion/ con una
 transición por cada carácter de la clase: esos archivos son los que se
 simulan en JFLAP (Input > Multiple Run).
@@ -84,8 +84,8 @@ def posiciones(afd, dot):
                 alto = float(partes[3])
             elif partes[0] == "node" and partes[1].strip('"') in afd.estados:
                 pos[partes[1].strip('"')] = (float(partes[2]), float(partes[3]))
-        pos = {q: (60 + x * 90, 60 + (alto - y) * 90) for q, (x, y) in pos.items()}
-        return separar(afd, pos)
+        pos = {q: (60 + x * 80, 60 + (alto - y) * 80) for q, (x, y) in pos.items()}
+        return dos_filas(afd, separar(afd, pos))
     return {q: (60 + i * 110, 120) for i, q in enumerate(afd.estados)}
 
 
@@ -116,6 +116,23 @@ def separar(afd, pos, distancia=40, paso=12):
     return {q: (x, y - menor_y + 100) for q, (x, y) in pos.items()}
 
 
+def dos_filas(afd, pos):
+    """El rango de horas son dos autómatas de hora seguidos (estados h y k); en
+    una sola fila queda demasiado ancho. La parte k se dibuja debajo, de derecha
+    a izquierda, para que h7 -> k0 sea una flecha corta hacia abajo."""
+    if afd.tipo != A.RANGO_HORA.tipo:
+        return pos
+    h = {q: p for q, p in pos.items() if q.startswith("h")}
+    k = {q: p for q, p in pos.items() if q.startswith("k")}
+    borde_der = max(x for x, _ in h.values())
+    min_xk = min(x for x, _ in k.values())
+    min_yk = min(y for _, y in k.values())
+    base = max(y for _, y in h.values()) + 75
+    for q, (x, y) in k.items():
+        pos[q] = (borde_der - (x - min_xk), base + (y - min_yk))
+    return pos
+
+
 def a_jff(afd, pos, expandir=False):
     ids = {q: i for i, q in enumerate(afd.estados)}
     out = ['<?xml version="1.0" encoding="UTF-8" standalone="no"?>',
@@ -131,13 +148,17 @@ def a_jff(afd, pos, expandir=False):
         if q in afd.finales:
             out.append("\t\t\t<final/>")
         out.append("\t\t</state>")
-    for origen, etiqueta, destino in afd.tabla():
-        for leido in (caracteres(etiqueta) if expandir else [etiqueta]):
-            out += ["\t\t<transition>",
-                    f"\t\t\t<from>{ids[origen]}</from>",
-                    f"\t\t\t<to>{ids[destino]}</to>",
-                    f"\t\t\t<read>{escape(leido)}</read>",
-                    "\t\t</transition>"]
+    if expandir:
+        lecturas = [(o, c, d) for o, etq, d in afd.tabla() for c in caracteres(etq)]
+    else:
+        # Para ver el diagrama: una sola etiqueta por par de estados ("a-z, _")
+        lecturas = [(o, ", ".join(etqs), d) for (o, d), etqs in aristas(afd).items()]
+    for origen, leido, destino in lecturas:
+        out += ["\t\t<transition>",
+                f"\t\t\t<from>{ids[origen]}</from>",
+                f"\t\t\t<to>{ids[destino]}</to>",
+                f"\t\t\t<read>{escape(leido)}</read>",
+                "\t\t</transition>"]
     out += ["\t</automaton>", "</structure>", ""]
     return "\n".join(out)
 

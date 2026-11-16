@@ -4,44 +4,24 @@
 	<type>fa</type>
 	<automaton>
 		<state id="0" name="q0">
-			<x>136.0</x>
+			<x>127.5</x>
 			<y>100.0</y>
 			<initial/>
 		</state>
 		<state id="1" name="q1">
-			<x>272.2</x>
+			<x>248.6</x>
 			<y>100.0</y>
 			<final/>
 		</state>
 		<transition>
 			<from>0</from>
 			<to>1</to>
-			<read>a-z</read>
-		</transition>
-		<transition>
-			<from>0</from>
-			<to>1</to>
-			<read>_</read>
+			<read>a-z, _</read>
 		</transition>
 		<transition>
 			<from>1</from>
 			<to>1</to>
-			<read>a-z</read>
-		</transition>
-		<transition>
-			<from>1</from>
-			<to>1</to>
-			<read>A-Z</read>
-		</transition>
-		<transition>
-			<from>1</from>
-			<to>1</to>
-			<read>0-9</read>
-		</transition>
-		<transition>
-			<from>1</from>
-			<to>1</to>
-			<read>_</read>
+			<read>a-z, A-Z, 0-9, _</read>
 		</transition>
 	</automaton>
 </structure>

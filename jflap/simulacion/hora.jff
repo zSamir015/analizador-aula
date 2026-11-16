@@ -4,37 +4,37 @@
 	<type>fa</type>
 	<automaton>
 		<state id="0" name="h0">
-			<x>136.0</x>
-			<y>190.5</y>
+			<x>127.5</x>
+			<y>185.8</y>
 			<initial/>
 		</state>
 		<state id="1" name="h1">
-			<x>253.1</x>
-			<y>103.0</y>
+			<x>231.7</x>
+			<y>108.0</y>
 		</state>
 		<state id="2" name="h2">
-			<x>253.1</x>
-			<y>190.5</y>
+			<x>231.7</x>
+			<y>185.8</y>
 		</state>
 		<state id="3" name="h3">
-			<x>320.6</x>
-			<y>289.2</y>
+			<x>291.7</x>
+			<y>273.6</y>
 		</state>
 		<state id="4" name="h4">
-			<x>388.1</x>
+			<x>351.7</x>
 			<y>100.0</y>
 		</state>
 		<state id="5" name="h5">
-			<x>489.4</x>
-			<y>185.5</y>
+			<x>441.7</x>
+			<y>181.3</y>
 		</state>
 		<state id="6" name="h6">
-			<x>606.6</x>
-			<y>185.5</y>
+			<x>545.8</x>
+			<y>181.3</y>
 		</state>
 		<state id="7" name="h7">
-			<x>728.8</x>
-			<y>185.5</y>
+			<x>654.5</x>
+			<y>181.3</y>
 			<final/>
 		</state>
 		<transition>

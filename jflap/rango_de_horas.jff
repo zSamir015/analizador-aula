@@ -4,69 +4,69 @@
 	<type>fa</type>
 	<automaton>
 		<state id="0" name="h0">
-			<x>136.0</x>
-			<y>195.5</y>
+			<x>127.5</x>
+			<y>190.2</y>
 			<initial/>
 		</state>
 		<state id="1" name="h1">
-			<x>253.1</x>
-			<y>108.0</y>
+			<x>231.7</x>
+			<y>112.4</y>
 		</state>
 		<state id="2" name="h2">
-			<x>253.1</x>
-			<y>195.5</y>
+			<x>231.7</x>
+			<y>190.2</y>
 		</state>
 		<state id="3" name="h3">
-			<x>320.6</x>
-			<y>294.2</y>
+			<x>291.7</x>
+			<y>278.0</y>
 		</state>
 		<state id="4" name="h4">
-			<x>388.1</x>
-			<y>105.0</y>
+			<x>351.7</x>
+			<y>104.4</y>
 		</state>
 		<state id="5" name="h5">
-			<x>489.4</x>
-			<y>190.5</y>
+			<x>441.7</x>
+			<y>185.8</y>
 		</state>
 		<state id="6" name="h6">
-			<x>606.6</x>
-			<y>190.5</y>
+			<x>545.8</x>
+			<y>185.8</y>
 		</state>
 		<state id="7" name="h7">
-			<x>723.8</x>
-			<y>190.5</y>
+			<x>650.0</x>
+			<y>185.8</y>
 		</state>
 		<state id="8" name="k0">
-			<x>826.0</x>
-			<y>190.5</y>
+			<x>650.0</x>
+			<y>438.8</y>
 		</state>
 		<state id="9" name="k1">
-			<x>943.1</x>
-			<y>103.0</y>
+			<x>545.8</x>
+			<y>361.0</y>
 		</state>
 		<state id="10" name="k2">
-			<x>943.1</x>
-			<y>190.5</y>
+			<x>545.8</x>
+			<y>438.8</y>
 		</state>
 		<state id="11" name="k3">
-			<x>1010.7</x>
-			<y>289.2</y>
+			<x>485.8</x>
+			<y>526.6</y>
 		</state>
 		<state id="12" name="k4">
-			<x>1078.2</x>
-			<y>100.0</y>
+			<x>425.8</x>
+			<y>353.0</y>
 		</state>
 		<state id="13" name="k5">
-			<x>1179.4</x>
-			<y>185.5</y>
+			<x>335.8</x>
+			<y>434.3</y>
 		</state>
 		<state id="14" name="k6">
-			<x>1296.6</x>
-			<y>185.5</y>
+			<x>231.7</x>
+			<y>434.3</y>
 		</state>
 		<state id="15" name="k7">
-			<x>1418.7</x>
-			<y>185.5</y>
+			<x>123.1</x>
+			<y>434.3</y>
 			<final/>
 		</state>
 		<transition>
