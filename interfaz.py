@@ -57,7 +57,7 @@ class InterfazAULA:
 
         self.etiqueta_archivo = ttk.Label(
             marco_archivo,
-            text="Ningun archivo seleccionado"
+            text="Ningún archivo seleccionado"
         )
         self.etiqueta_archivo.pack(
             side="left", padx=15
@@ -161,7 +161,7 @@ class InterfazAULA:
         # Resumen
         ttk.Label(
             panel,
-            text="Resumen del analisis",
+            text="Resumen del análisis",
             font=("Arial", 12, "bold")
         ).grid(
             row=2, column=0,
@@ -217,7 +217,7 @@ class InterfazAULA:
 
         self.boton_tabla = tk.Button(
             barra_inferior,
-            text="Ver tabla de simbolos",
+            text="Ver tabla de símbolos",
             command=self.mostrar_tabla,
             width=26,
             height=2,
@@ -235,6 +235,12 @@ class InterfazAULA:
             row=0, column=0,
             pady=5
         )
+
+        # En macOS (Aqua) tk.Button ignora bg: el texto blanco quedaría
+        # sobre el botón claro del sistema. Se usan los colores del sistema.
+        if self.ventana.tk.call("tk", "windowingsystem") == "aqua":
+            self.boton_tabla.config(fg="systemButtonText",
+                                    activeforeground="systemButtonText")
 
     # PARTE 6: Abrir archivo TXT
     def seleccionar_archivo(self):
@@ -333,7 +339,7 @@ class InterfazAULA:
                 "Error inesperado",
                 str(error)
             )
-            self.estado.set("El analisis se interrumpio.")
+            self.estado.set("El análisis se interrumpió.")
             self.restablecer_controles()
             return
 
@@ -346,8 +352,8 @@ class InterfazAULA:
                 self.validas += 1
 
                 mensaje = (
-                    f"Linea {resultado.numero}: "
-                    f"VALIDA ({resultado.sentencia})\n"
+                    f"Línea {resultado.numero}: "
+                    f"VÁLIDA ({resultado.sentencia})\n"
                 )
 
                 self.resultados.insert(
@@ -370,7 +376,7 @@ class InterfazAULA:
                 "Error de procesamiento",
                 str(error)
             )
-            self.estado.set("El analisis se interrumpio.")
+            self.estado.set("El análisis se interrumpió.")
             self.restablecer_controles()
 
     # PARTE 5: Mostrar cada error
@@ -406,17 +412,17 @@ class InterfazAULA:
 
         self.resultados.insert(
             tk.END,
-            "\n===== ANALISIS FINALIZADO =====\n",
+            "\n===== ANÁLISIS FINALIZADO =====\n",
             "titulo"
         )
 
         self.resultados.insert(
             tk.END,
-            f"Lineas validas: {self.validas}\n"
+            f"Líneas válidas: {self.validas}\n"
             f"Errores detectados: {self.manejador.total}\n"
         )
 
-        self.estado.set("Analisis finalizado.")
+        self.estado.set("Análisis finalizado.")
 
         self.restablecer_controles()
 
@@ -445,7 +451,7 @@ class InterfazAULA:
         )
 
         ventana_tabla.title(
-            "Tabla de simbolos - AULA"
+            "Tabla de símbolos - AULA"
         )
 
         ventana_tabla.geometry("1100x600")
@@ -464,7 +470,7 @@ class InterfazAULA:
 
         ttk.Label(
             marco,
-            text="Tabla de simbolos del lenguaje AULA",
+            text="Tabla de símbolos del lenguaje AULA",
             font=("Arial", 14, "bold")
         ).grid(
             row=0, column=0,
