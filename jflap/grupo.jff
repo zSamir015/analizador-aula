@@ -5,32 +5,32 @@
 	<automaton>
 		<state id="0" name="q0">
 			<x>136.0</x>
-			<y>87.5</y>
+			<y>100.0</y>
 			<initial/>
 		</state>
 		<state id="1" name="q1">
 			<x>253.1</x>
-			<y>87.5</y>
+			<y>100.0</y>
 		</state>
 		<state id="2" name="q2">
 			<x>372.2</x>
-			<y>87.5</y>
+			<y>100.0</y>
 		</state>
 		<state id="3" name="q3">
 			<x>491.3</x>
-			<y>87.5</y>
+			<y>100.0</y>
 		</state>
 		<state id="4" name="q4">
 			<x>608.5</x>
-			<y>87.5</y>
+			<y>100.0</y>
 		</state>
 		<state id="5" name="q5">
 			<x>725.6</x>
-			<y>87.5</y>
+			<y>100.0</y>
 		</state>
 		<state id="6" name="q6">
 			<x>847.8</x>
-			<y>87.5</y>
+			<y>100.0</y>
 			<final/>
 		</state>
 		<transition>

@@ -5,12 +5,12 @@
 	<automaton>
 		<state id="0" name="q0">
 			<x>136.0</x>
-			<y>138.8</y>
+			<y>100.0</y>
 			<initial/>
 		</state>
 		<state id="1" name="q1">
 			<x>258.1</x>
-			<y>138.8</y>
+			<y>100.0</y>
 			<final/>
 		</state>
 		<transition>

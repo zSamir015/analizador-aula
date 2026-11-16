@@ -1,0 +1,117 @@
+# Cadenas para Input > Multiple Run en JFLAP (una por fila).
+# Resultado obtenido en JFLAP 7.1 con los archivos de esta carpeta.
+
+[identificador.jff]
+max_creditos     Accept
+_tmp1            Accept
+x                Accept
+creditosGrupo    Accept
+9creditos        Reject
+Total            Reject
+max-creditos     Reject
+
+[dia.jff]
+LU               Accept
+MA               Accept
+VI               Accept
+SA               Accept
+lu               Reject
+L1               Reject
+
+[codigo_de_materia.jff]
+LFAC-301         Accept
+SO-302           Accept
+ABCD-999         Accept
+LFAC-30          Reject
+L-301            Reject
+LFACS-301        Reject
+lfac-301         Reject
+
+[grupo.jff]
+1IL142           Accept
+9AB000           Accept
+1IL14            Reject
+1I142            Reject
+IL142            Reject
+1IL1422          Reject
+
+[aula.jff]
+3-105            Accept
+12-201           Accept
+3-1050           Reject
+123-105          Reject
+3-10             Reject
+A-105            Reject
+
+[hora.jff]
+7:00             Accept
+07:30            Accept
+23:59            Accept
+0:00             Accept
+24:00            Reject
+7:60             Reject
+7:5              Reject
+25:70            Reject
+
+[rango_de_horas.jff]
+7:00-8:30        Accept
+9:00-10:30       Accept
+13:15-14:45      Accept
+7:00-            Reject
+7:00-25:00       Reject
+7:00             Reject
+9:00-7:00        Accept
+
+[entero.jff]
+0                Accept
+18               Accept
+2026             Accept
+18a              Reject
+-5               Reject
+1.5              Reject
+
+[real.jff]
+71.5             Accept
+0.25             Accept
+3.0              Accept
+71.              Reject
+.5               Reject
+7.1.2            Reject
+
+[cadena.jff]
+"Hola"           Accept
+""               Accept
+"LFAC-301"       Accept
+"Revisar_carga"  Accept
+"Hola            Reject
+Hola"            Reject
+"a"b"            Reject
+
+[operador_relacional.jff]
+==               Accept
+!=               Accept
+<                Accept
+<=               Accept
+>                Accept
+>=               Accept
+=                Reject
+=<               Reject
+!                Reject
+
+[asignacion.jff]
+=                Accept
+==               Reject
+;                Reject
+
+[delimitador.jff]
+;                Accept
+;;               Reject
+,                Reject
+
+[comentario.jff]
+#nota            Accept
+#                Accept
+#"texto"         Accept
+##               Accept
+nota             Reject
+nota#            Reject

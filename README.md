@@ -133,13 +133,17 @@ aula/
   validador.py  API pública
   tabla_simbolos.py    tabla de símbolos (tabla hash con encadenamiento)
   manejador_errores.py manejador de errores
-jflap/          AFD en formato JFLAP 7
+jflap/          AFD en formato JFLAP 7 (simulacion/: versión para simular)
 diagramas/      AFD en PNG
 herramientas/   exportar_automatas.py genera jflap/ y diagramas/
 ```
 
-En los `.jff` cada transición muestra la clase de caracteres que lee. Para
-simular en JFLAP se reemplaza la etiqueta por un carácter de la clase.
+En `jflap/` cada transición muestra la clase de caracteres que lee (`0-9`,
+`A-Z`...). JFLAP toma esas etiquetas como texto literal, así que para simular
+se usan los archivos de `jflap/simulacion/`: mismos estados, con una
+transición por cada carácter de la clase. Ahí está también
+`cadenas_de_prueba.txt` con las cadenas usadas en Input > Multiple Run y el
+resultado obtenido en JFLAP 7.1.
 
 ## API
 

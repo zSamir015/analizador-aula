@@ -5,12 +5,19 @@
 Las posiciones de los estados en los .jff se toman del layout de Graphviz si
 `dot` está instalado; si no, se usa una distribución lineal.
 
-En JFLAP cada transición muestra la clase de caracteres que lee ("0-9",
-"A-Z", ...). Las clases de un solo carácter (":", "-", ";") son literales.
+En jflap/ cada transición muestra la clase de caracteres que lee ("0-9",
+"A-Z", ...), que es lo legible para el documento. JFLAP toma esas etiquetas
+como texto literal, así que además se genera jflap/simulacion/ con una
+transición por cada carácter de la clase: esos archivos son los que se
+simulan en JFLAP (Input > Multiple Run).
+
+Las clases Σ y Σ-{"} se expanden a ALFABETO_SIMULACION. El espacio queda
+fuera porque en JFLAP una etiqueta en blanco es λ.
 """
 
 import os
 import shutil
+import string
 import subprocess
 import sys
 import unicodedata
@@ -21,6 +28,16 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RAIZ)
 
 from aula import automatas as A  # noqa: E402
+from aula.afd import CLASES  # noqa: E402
+
+ALFABETO_SIMULACION = (string.digits + string.ascii_uppercase + string.ascii_lowercase
+                       + '_:-.;=<>!#,()"' + "áéíóúñÑ")
+
+
+def caracteres(etiqueta):
+    """Caracteres concretos de una clase, en el orden de ALFABETO_SIMULACION."""
+    clase = CLASES[etiqueta]
+    return [c for c in ALFABETO_SIMULACION if c in clase]
 
 
 def nombre_archivo(afd):
@@ -67,11 +84,39 @@ def posiciones(afd, dot):
                 alto = float(partes[3])
             elif partes[0] == "node" and partes[1].strip('"') in afd.estados:
                 pos[partes[1].strip('"')] = (float(partes[2]), float(partes[3]))
-        return {q: (60 + x * 90, 60 + (alto - y) * 90) for q, (x, y) in pos.items()}
+        pos = {q: (60 + x * 90, 60 + (alto - y) * 90) for q, (x, y) in pos.items()}
+        return separar(afd, pos)
     return {q: (60 + i * 110, 120) for i, q in enumerate(afd.estados)}
 
 
-def a_jff(afd, pos):
+def separar(afd, pos, distancia=40, paso=12):
+    """JFLAP dibuja las transiciones en línea recta (Graphviz las curva). Si una
+    recta pasa sobre otro estado, ese estado se aleja de la recta."""
+    aristas_rectas = {(o, d) for o, _, d in afd.tabla() if o != d}
+    for _ in range(40):
+        movido = False
+        for a, b in aristas_rectas:
+            (ax, ay), (bx, by) = pos[a], pos[b]
+            dx, dy = bx - ax, by - ay
+            largo2 = dx * dx + dy * dy
+            for c, (cx, cy) in pos.items():
+                if c in (a, b) or not largo2:
+                    continue
+                t = ((cx - ax) * dx + (cy - ay) * dy) / largo2
+                if not 0.05 < t < 0.95:
+                    continue
+                px, py = ax + t * dx, ay + t * dy
+                if (cx - px) ** 2 + (cy - py) ** 2 < distancia ** 2:
+                    lado = -1 if cy <= py else 1
+                    pos[c] = (cx, cy + lado * paso)
+                    movido = True
+        if not movido:
+            break
+    menor_y = min(y for _, y in pos.values())
+    return {q: (x, y - menor_y + 100) for q, (x, y) in pos.items()}
+
+
+def a_jff(afd, pos, expandir=False):
     ids = {q: i for i, q in enumerate(afd.estados)}
     out = ['<?xml version="1.0" encoding="UTF-8" standalone="no"?>',
            f"<!--AFD {escape(afd.nombre)}: {escape(afd.expresion)}-->",
@@ -87,11 +132,12 @@ def a_jff(afd, pos):
             out.append("\t\t\t<final/>")
         out.append("\t\t</state>")
     for origen, etiqueta, destino in afd.tabla():
-        out += ["\t\t<transition>",
-                f"\t\t\t<from>{ids[origen]}</from>",
-                f"\t\t\t<to>{ids[destino]}</to>",
-                f"\t\t\t<read>{escape(etiqueta)}</read>",
-                "\t\t</transition>"]
+        for leido in (caracteres(etiqueta) if expandir else [etiqueta]):
+            out += ["\t\t<transition>",
+                    f"\t\t\t<from>{ids[origen]}</from>",
+                    f"\t\t\t<to>{ids[destino]}</to>",
+                    f"\t\t\t<read>{escape(leido)}</read>",
+                    "\t\t</transition>"]
     out += ["\t</automaton>", "</structure>", ""]
     return "\n".join(out)
 
@@ -99,8 +145,9 @@ def a_jff(afd, pos):
 def main():
     dot = shutil.which("dot")
     dir_jff = os.path.join(RAIZ, "jflap")
+    dir_sim = os.path.join(dir_jff, "simulacion")
     dir_png = os.path.join(RAIZ, "diagramas")
-    os.makedirs(dir_jff, exist_ok=True)
+    os.makedirs(dir_sim, exist_ok=True)
     if dot:
         os.makedirs(dir_png, exist_ok=True)
     else:
@@ -108,8 +155,11 @@ def main():
 
     for afd in A.TODOS:
         nombre = nombre_archivo(afd)
+        pos = posiciones(afd, dot)
         with open(os.path.join(dir_jff, f"{nombre}.jff"), "w", encoding="utf-8") as f:
-            f.write(a_jff(afd, posiciones(afd, dot)))
+            f.write(a_jff(afd, pos))
+        with open(os.path.join(dir_sim, f"{nombre}.jff"), "w", encoding="utf-8") as f:
+            f.write(a_jff(afd, pos, expandir=True))
         if dot:
             subprocess.run([dot, "-Tpng", "-Gdpi=200", "-o",
                             os.path.join(dir_png, f"{nombre}.png")],

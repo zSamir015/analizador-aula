@@ -5,36 +5,36 @@
 	<automaton>
 		<state id="0" name="h0">
 			<x>136.0</x>
-			<y>172.1</y>
+			<y>190.5</y>
 			<initial/>
 		</state>
 		<state id="1" name="h1">
 			<x>253.1</x>
-			<y>84.6</y>
+			<y>103.0</y>
 		</state>
 		<state id="2" name="h2">
 			<x>253.1</x>
-			<y>172.1</y>
+			<y>190.5</y>
 		</state>
 		<state id="3" name="h3">
 			<x>320.6</x>
-			<y>270.9</y>
+			<y>289.2</y>
 		</state>
 		<state id="4" name="h4">
 			<x>388.1</x>
-			<y>129.6</y>
+			<y>100.0</y>
 		</state>
 		<state id="5" name="h5">
 			<x>489.4</x>
-			<y>167.1</y>
+			<y>185.5</y>
 		</state>
 		<state id="6" name="h6">
 			<x>606.6</x>
-			<y>167.1</y>
+			<y>185.5</y>
 		</state>
 		<state id="7" name="h7">
 			<x>728.8</x>
-			<y>167.1</y>
+			<y>185.5</y>
 			<final/>
 		</state>
 		<transition>
