@@ -1693,7 +1693,7 @@ class VentanaTabla:
         tk.Label(
             encabezado,
             text=f"{archivo}   ·   {len(tabla.simbolos_usados())} símbolos usados ({e['simbolos']} instalados)   ·   "
-            f"capacidad {e['capacidad']}   ·   cubetas ocupadas {e['cubetas_ocupadas']}   ·   "
+            f"capacidad {e['capacidad']}   ·   "
             f"factor de carga {e['factor_carga']}   ·   colisiones {e['colisiones']}   ·   "
             f"redimensiones {e['redimensiones']}",
             font=ui.f_subtitulo,
@@ -1717,7 +1717,6 @@ class VentanaTabla:
         self._marcos_vista = {}
         for k_v, tit_v in (
             ("tabla", "Vista tabular"),
-            ("cubetas", "Cubetas hash"),
             ("texto", "Texto formateado"),
         ):
             bv = ttk.Button(
@@ -1834,34 +1833,7 @@ class VentanaTabla:
         self.arbol.configure(yscrollcommand=sv.set, xscrollcommand=sh.set)
         self.arbol.bind("<<TreeviewSelect>>", self._al_seleccionar_fila)
 
-        # 2. Vista de Cubetas Hash (formatear_cubetas)
-        m_cubetas = tk.Frame(contenedor, bg=c["editor"])
-        m_cubetas.grid(row=0, column=0, sticky="nsew")
-        m_cubetas.columnconfigure(0, weight=1)
-        m_cubetas.rowconfigure(0, weight=1)
-        self._marcos_vista["cubetas"] = m_cubetas
-
-        self.texto_cubetas = tk.Text(
-            m_cubetas,
-            wrap="none",
-            font=ui.f_mono,
-            bg=c["editor"],
-            fg=c["texto"],
-            relief="flat",
-            borderwidth=0,
-            highlightthickness=0,
-            padx=14,
-            pady=12,
-        )
-        self.texto_cubetas.grid(row=0, column=0, sticky="nsew")
-        sv_c = ttk.Scrollbar(m_cubetas, orient="vertical", command=self.texto_cubetas.yview)
-        sv_c.grid(row=0, column=1, sticky="ns")
-        self.texto_cubetas.configure(yscrollcommand=sv_c.set)
-        self.texto_cubetas.tag_configure("indice", foreground=c["acento_claro"], font=ui.f_mono_neg)
-        self.texto_cubetas.tag_configure("colision", foreground=c["ambar"], font=ui.f_mono_neg)
-        self.texto_cubetas.tag_configure("unico", foreground=c["verde"])
-
-        # 3. Vista de Texto Formateado (formatear)
+        # 2. Vista de Texto Formateado (formatear)
         m_texto = tk.Frame(contenedor, bg=c["editor"])
         m_texto.grid(row=0, column=0, sticky="nsew")
         m_texto.columnconfigure(0, weight=1)
@@ -1996,22 +1968,7 @@ class VentanaTabla:
                 ),
             )
 
-        # Actualizar vistas de cubetas y texto formateado
-        self.texto_cubetas.configure(state="normal")
-        self.texto_cubetas.delete("1.0", tk.END)
-        for ln in self.tabla.formatear_cubetas().split("\n"):
-            if not ln:
-                continue
-            partes = ln.split(" ", 1)
-            self.texto_cubetas.insert(tk.END, partes[0] + " ", "indice")
-            if len(partes) > 1:
-                es_col = " -> " in partes[1]
-                suf = "   [colisión encadenada]" if es_col else ""
-                self.texto_cubetas.insert(
-                    tk.END, partes[1] + suf + "\n", "colision" if es_col else "unico"
-                )
-        self.texto_cubetas.configure(state="disabled")
-
+        # Actualizar la vista de texto formateado
         self.texto_formateado.configure(state="normal")
         self.texto_formateado.delete("1.0", tk.END)
         self.texto_formateado.insert(

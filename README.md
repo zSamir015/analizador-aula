@@ -275,8 +275,8 @@ print(tabla.formatear())
   aparece cuando el manejador lo reporta; en el código se marca la línea y se
   subraya el lexema. Las pestañas muestran el diagnóstico (filtrable), la tabla
   de errores (al elegir uno salta a la línea) y los tokens.
-- **Ver tabla de símbolos** (Ctrl/Cmd+T) abre la tabla con tres vistas:
-  tabular (ordenable y con buscador), cubetas hash y texto formateado.
+- **Ver tabla de símbolos** (Ctrl/Cmd+T) abre la tabla con dos vistas:
+  tabular (ordenada por índice, ordenable y con buscador) y texto formateado.
 - Tema claro u oscuro y evaluación paso a paso opcional.
 
 Usa solo Tkinter con el tema `clam` y colores propios, así que se ve igual en
