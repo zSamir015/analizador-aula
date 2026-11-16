@@ -40,7 +40,7 @@ class TestLexico(unittest.TestCase):
             'texto t = "Hola;': "E02",
             "real n = 71.;": "E03",
             "hora h = 25:70;": "E04",
-            "materia LFAC-30 \"X\" creditos 4;": "E05",
+            "materia LFAC-30 \"X\" ;": "E05",
             "grupo 1IL14;": "E06",
             "entero 9creditos = 1;": "E07",
             "entero Total = 1;": "E07",

@@ -209,18 +209,18 @@ class TablaSimbolos:
     def formatear(self, incluir_no_usados=False):
         """Tabla de texto con los símbolos instalados (por defecto solo los usados).
 
-        Columnas: índice hash (cubeta = hash % capacidad), lexema, token,
-        categoría, primera aparición (línea:columna), cantidad de apariciones
-        y todas las posiciones.
+        Filas ordenadas por índice (hash % capacidad); los lexemas que
+        colisionan aparecen seguidos con el mismo índice. Columnas: índice,
+        lexema, token, categoría, línea de la primera aparición y apariciones.
         """
         simbolos = list(self._orden) if incluir_no_usados else self.simbolos_usados()
+        posicion = {id(sim): i for i, sim in enumerate(self._orden)}
+        simbolos.sort(key=lambda sim: (self.indice(sim.lexema), posicion[id(sim)]))
         filas = []
         for s in simbolos:
             filas.append((str(self.indice(s.lexema)), s.lexema, s.tipo, s.categoria,
-                          f"{s.linea}:{s.columna}" if s.ocurrencias else "-", str(s.veces),
-                          " ".join(f"{l}:{c}" for l, c in s.ocurrencias) or "-"))
-        titulos = ("Índice hash", "Lexema", "Token", "Categoría", "1.ª aparición",
-                   "Apariciones", "Posiciones (línea:columna)")
+                          str(s.linea) if s.ocurrencias else "-", str(s.veces)))
+        titulos = ("Índice", "Lexema", "Token", "Categoría", "Línea", "Apariciones")
         anchos = [max(len(t), *(len(f[i]) for f in filas)) if filas else len(t)
                   for i, t in enumerate(titulos)]
 

@@ -45,7 +45,7 @@ vacías y los comentarios (`# ...`) se ignoran. El archivo puede estar en UTF-8
 
 ```
 entero max_horas_dia = 6;
-materia LFAC-301 "Lenguajes Formales" creditos 4;
+materia LFAC-301 "Lenguajes Formales";
 profesor samaniego "Nicolas Samaniego";
 aula 3-105 capacidad 40;
 grupo 1IL142;
@@ -62,7 +62,7 @@ horas_lunes = 3;
 | Token | Expresión regular | Ejemplo |
 |---|---|---|
 | IDENTIFICADOR | `[a-z_][a-zA-Z0-9_]*` (máx. 31) | `max_horas_dia` |
-| RESERVADA | 27 palabras en minúscula | `asignar` |
+| RESERVADA | 26 palabras en minúscula | `asignar` |
 | DIA | `LU \| MA \| MI \| JU \| VI` | `LU` |
 | CODIGO_MATERIA | `[A-Z]{2,4}-[0-9]{3}` | `LFAC-301` |
 | GRUPO | `[0-9][A-Z]{2}[0-9]{3}` | `1IL142` |
@@ -77,7 +77,7 @@ horas_lunes = 3;
 | DELIMITADOR | `;` | `;` |
 
 Palabras reservadas: `materia profesor aula grupo asignar eliminar verificar
-mostrar a con en de creditos capacidad horario choque si entonces entero real
+mostrar a con en de capacidad horario choque si entonces entero real
 texto logico hora verdadero falso y o`.
 
 ### Forma de las líneas (referencia)
@@ -183,7 +183,7 @@ for r in analizar_archivo("entrada.txt"):   # generador, una línea a la vez
 
 `aula/tabla_simbolos.py`: tabla hash con encadenamiento separado. La función
 hash es polinomial (`h = h*31 + código del carácter`, 32 bits) y el índice es
-`hash % capacidad`. Empieza con capacidad 53 (primo), se precarga con las 27
+`hash % capacidad`. Empieza con capacidad 53 (primo), se precarga con las 26
 palabras reservadas y los 5 días, y se duplica a un primo mayor cuando el
 factor de carga pasa de 0.75.
 
@@ -191,17 +191,17 @@ Cada `Simbolo` guarda `lexema`, `tipo`, `categoria`, `linea`/`columna` de la
 primera aparición y `ocurrencias` (todas las posiciones, `veces` = cuántas).
 Solo información léxica: no guarda tipos de dato, valores ni declaraciones.
 
-Columnas que muestra la tabla (interfaz y `formatear()`):
+La tabla se muestra ordenada por índice, como una tabla hash: cada fila es un
+símbolo y los que colisionan aparecen seguidos con el mismo índice.
 
 | Columna | Significado |
 |---|---|
-| Índice hash | cubeta donde se guarda el símbolo: `hash(lexema) % capacidad` |
+| Índice | posición en la tabla: `hash(lexema) % capacidad` |
 | Lexema | texto tal como aparece en el archivo (`LFAC-301`, `samaniego`) |
 | Token | tipo reconocido por el AFD (`CODIGO_MATERIA`, `IDENTIFICADOR`) |
 | Categoría | clase del token: materia, grupo, aula, identificador, literal, operador... |
-| 1.ª aparición | `línea:columna` donde aparece por primera vez |
+| Línea | línea de la primera aparición |
 | Apariciones | cuántas veces aparece en el archivo |
-| Posiciones | `línea:columna` de todas las apariciones |
 
 ```python
 from aula import TablaSimbolos, analizar_archivo

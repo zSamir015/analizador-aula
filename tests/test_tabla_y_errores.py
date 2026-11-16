@@ -43,7 +43,7 @@ class TestTablaSimbolos(unittest.TestCase):
         self.assertEqual(sum(1 for s in tabla if s.lexema == "1"), 1)
 
     def test_solo_informacion_lexica(self):
-        tabla = tabla_de('materia LFAC-301 "Lenguajes" creditos 4;', "entero max = 18;")
+        tabla = tabla_de('materia LFAC-301 "Lenguajes";', "entero max = 18;")
         m = tabla.buscar("LFAC-301")
         self.assertEqual((m.tipo, m.categoria), (T.CODIGO_MATERIA, "materia"))
         self.assertEqual(tabla.buscar("max").categoria, "identificador")

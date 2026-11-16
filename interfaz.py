@@ -1643,23 +1643,20 @@ class InterfazAULA:
 
 class VentanaTabla:
     COLUMNAS = (
-        ("hash", "Índice hash", 90, "e"),
-        ("lexema", "Lexema", 200, "w"),
-        ("tipo", "Token", 140, "w"),
-        ("categoria", "Categoría", 130, "w"),
-        ("linea", "1.ª aparición", 100, "center"),
-        ("veces", "Apariciones", 90, "e"),
-        ("posiciones", "Posiciones (línea:columna)", 260, "w"),
+        ("hash", "Índice", 80, "e"),
+        ("lexema", "Lexema", 240, "w"),
+        ("tipo", "Token", 160, "w"),
+        ("categoria", "Categoría", 150, "w"),
+        ("linea", "Línea", 90, "center"),
+        ("veces", "Apariciones", 100, "e"),
     )
 
     LEYENDA = (
-        "Índice hash: cubeta donde se guarda (hash % capacidad)   ·   "
-        "Lexema: texto tal como aparece en el archivo   ·   "
-        "Token: tipo reconocido por el AFD   ·   "
-        "Categoría: clase del token (materia, grupo, literal, operador...)\n"
-        "1.ª aparición: línea:columna donde aparece por primera vez   ·   "
-        "Apariciones: cuántas veces aparece   ·   "
-        "Posiciones: todas sus apariciones"
+        "Índice: posición en la tabla hash, hash(lexema) % capacidad; si dos lexemas "
+        "tienen el mismo índice (colisión) aparecen en filas seguidas con ese índice\n"
+        "Lexema: texto tal como aparece en el archivo   ·   Token: tipo reconocido por el AFD   ·   "
+        "Categoría: clase del token   ·   Línea: primera aparición   ·   "
+        "Apariciones: cuántas veces aparece"
     )
 
     def __init__(self, padre, tabla, archivo, ui):
@@ -1821,7 +1818,7 @@ class VentanaTabla:
                 clave,
                 width=ancho,
                 anchor=lado,
-                stretch=(clave in ("lexema", "posiciones")),
+                stretch=(clave == "lexema"),
                 minwidth=55,
             )
         self.arbol.tag_configure("par", background=c["fila_par"])
@@ -1953,12 +1950,10 @@ class VentanaTabla:
             "palabra reservada": 10,
         }
         if self._orden_col is None:
+            # Orden de la tabla hash: por índice y, dentro de un índice, por orden de encadenamiento
+            orden = {id(sim): i for i, sim in enumerate(self.tabla)}
             filas_datos.sort(
-                key=lambda item: (
-                    prioridad.get(item[0].categoria, 9),
-                    item[0].linea or 9999,
-                    item[0].lexema,
-                )
+                key=lambda item: (self.tabla.indice(item[0].lexema), orden[id(item[0])])
             )
         else:
             col = self._orden_col
@@ -1996,9 +1991,8 @@ class VentanaTabla:
                     s.lexema,
                     s.tipo,
                     s.categoria,
-                    f"{s.linea}:{s.columna}" if s.ocurrencias else "—",
+                    s.linea if s.ocurrencias else "—",
                     s.veces,
-                    "  ".join(f"{l}:{c}" for l, c in s.ocurrencias) or "—",
                 ),
             )
 

@@ -14,6 +14,10 @@
   recuperó el analizador y sugerencia.
 - El lenguaje se delimita a asignación de horarios (no matrícula). Ejemplos sin
   variables de créditos ni notas.
+- Se quitó la palabra reservada `creditos` (dato de matrícula): la sentencia
+  de materia queda `materia CODIGO_MATERIA CADENA ;`. Quedan 26 reservadas.
+- La tabla de símbolos se muestra ordenada por índice hash, con las columnas
+  Índice, Lexema, Token, Categoría, Línea y Apariciones, y una leyenda.
 
 ## 2026-11-15 (revisión y entrega)
 

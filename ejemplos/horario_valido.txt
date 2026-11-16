@@ -5,8 +5,8 @@ logico publicado = falso;
 hora inicio_jornada = 7:00;
 real duracion_bloque = 1.5;
 
-materia LFAC-301 "Lenguajes Formales, Automatas y Compiladores" creditos 4;
-materia SO-302 "Sistemas Operativos" creditos 4;
+materia LFAC-301 "Lenguajes Formales, Automatas y Compiladores";
+materia SO-302 "Sistemas Operativos";
 profesor samaniego "Nicolas Samaniego";
 profesor esquivel "Isaac Esquivel";
 aula 3-105 capacidad 40;

@@ -4,7 +4,7 @@ texto saludo = "Hola;
 real duracion = 1.;
 hora inicio = 25:70;
 asignar LFAC-301 a 1IL142 con samaniego en 3-105 LU 7:00-8:70;
-materia LFAC-30 "Lenguajes" creditos 4;
+materia LFAC-30 "Lenguajes";
 grupo 1IL14;
 entero 9horas = 6;
 entero Total = 5;

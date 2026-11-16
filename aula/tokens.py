@@ -19,14 +19,14 @@ ASIGNACION = "ASIGNACION"
 DELIMITADOR = "DELIMITADOR"
 COMENTARIO = "COMENTARIO"
 
-# Palabras reservadas (27) + días (5) = 32
+# Palabras reservadas (26) + días (5) = 31
 PALABRAS_RESERVADAS = frozenset({
     # entidades
     "materia", "profesor", "aula", "grupo",
     # acciones
     "asignar", "eliminar", "verificar", "mostrar",
     # conectores
-    "a", "con", "en", "de", "creditos", "capacidad", "horario", "choque",
+    "a", "con", "en", "de", "capacidad", "horario", "choque",
     # control
     "si", "entonces",
     # tipos de dato
