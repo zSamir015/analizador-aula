@@ -118,6 +118,12 @@ class TestArchivos(unittest.TestCase):
         self.assertEqual([r.numero for r in resultados], [3])
 
 
+class TestUbicacionErrores(unittest.TestCase):
+    def test_e01_senala_el_caracter(self):
+        e = analizar_cadena('profesor samañego "Nicolas";').errores[0]
+        self.assertEqual((e.codigo, e.columna, e.lexema), ("E01", 14, "ñ"))
+
+
 class TestCodificacion(unittest.TestCase):
     def analizar_bytes(self, datos):
         with tempfile.NamedTemporaryFile("wb", suffix=".txt", delete=False) as f:

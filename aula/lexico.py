@@ -131,7 +131,7 @@ def analizar_linea(texto, linea=1):
         if invalido is not None:
             ch = palabra[invalido]
             errores.append(Error("E01", f"Carácter no válido '{ch}' en '{palabra}'",
-                                 linea, col + invalido, palabra))
+                                 linea, col + invalido, ch))
             pos = fin
             continue
 
