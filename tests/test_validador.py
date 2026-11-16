@@ -14,7 +14,7 @@ def codigos(texto):
 
 class TestLexico(unittest.TestCase):
     def test_tokens_de_asignacion(self):
-        r = analizar_cadena("asignar LFAC-301 a 1IL142 con samaniego en 3-105 LU 7:00-8:30;")
+        r = analizar_cadena("asignar 8242 a 1IL142 con samaniego en 3-105 LU 7:00-8:30;")
         self.assertTrue(r.valida)
         self.assertEqual([t.tipo for t in r.tokens], [
             T.RESERVADA, T.CODIGO_MATERIA, T.RESERVADA, T.GRUPO, T.RESERVADA,
@@ -40,11 +40,11 @@ class TestLexico(unittest.TestCase):
             'texto t = "Hola;': "E02",
             "real n = 71.;": "E03",
             "hora h = 25:70;": "E04",
-            "materia LFAC-30 \"X\" ;": "E05",
+            "materia LFAC-301 \"X\" ;": "E05",
             "grupo 1IL14;": "E06",
             "entero 9creditos = 1;": "E07",
             "entero Total = 1;": "E07",
-            "asignar LFAC-301 a 1IL142 con s en 3-105 SA 7:00-8:30;": "E08",
+            "asignar 8242 a 1IL142 con s en 3-105 SA 7:00-8:30;": "E08",
             "aula 3-1050 capacidad 40;": "E09",
             "entero " + "a" * 32 + " = 1;": "E10",
         }
@@ -65,18 +65,31 @@ class TestLexico(unittest.TestCase):
         self.assertEqual([t.lexema for t in r.tokens], ["grupo", "1IL142", ";"])
 
 
+class TestCodigoMateria(unittest.TestCase):
+    def test_cuatro_digitos_es_codigo(self):
+        tipos = [t.tipo for t in analizar_cadena("materia 8242 \"Lenguajes\";").tokens]
+        self.assertEqual(tipos[1], T.CODIGO_MATERIA)
+
+    def test_otros_largos_son_enteros(self):
+        for n in ("40", "824", "82420"):
+            self.assertEqual(analizar_cadena(n).tokens[0].tipo, T.ENTERO, n)
+
+    def test_formato_viejo_es_error(self):
+        self.assertEqual(codigos("materia LFAC-301 \"X\";"), ["E05"])
+
+
 class TestSoloLexico(unittest.TestCase):
     """El analizador no revisa sintaxis ni semántica."""
 
     def test_orden_de_tokens_no_se_valida(self):
         for texto in ("capacidad 40;", "grupo 1IL142", "; grupo grupo",
-                      "asignar LFAC-301 a 1IL142 con s en 3-105 7:00-8:30 LU;",
+                      "asignar 8242 a 1IL142 con s en 3-105 7:00-8:30 LU;",
                       "si max >> 18 entonces mostrar x;"):
             self.assertTrue(analizar_cadena(texto).valida, texto)
 
     def test_valores_no_se_validan(self):
         self.assertTrue(analizar_cadena("entero max = \"dieciocho\";").valida)
-        r = analizar_cadena("asignar LFAC-301 a 1IL142 con s en 3-105 LU 9:00-7:00;")
+        r = analizar_cadena("asignar 8242 a 1IL142 con s en 3-105 LU 9:00-7:00;")
         self.assertTrue(r.valida)
         self.assertEqual(r.tokens[-2].tipo, T.RANGO_HORA)
 

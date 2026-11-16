@@ -6,7 +6,8 @@ los que no pertenecen a ningún token. No revisa el orden de los tokens
 RANGO_HORA léxicamente correcto aunque el rango esté invertido.
 
 Regla de la coincidencia más larga: en cada posición se prueban los AFD y se
-toma el prefijo aceptado más largo. Un token de tipo "palabra" debe terminar
+toma el prefijo aceptado más largo. Si dos AFD aceptan la misma longitud gana
+el primero de la lista: una palabra de 4 dígitos es CODIGO_MATERIA, no ENTERO. Un token de tipo "palabra" debe terminar
 en un separador; si no, la palabra completa se reporta como error y el
 análisis continúa después de ella (recuperación en modo pánico).
 """
@@ -51,8 +52,9 @@ def clasificar_error(palabra):
     if p0 == ".":
         return "E03", f"Número real mal formado '{palabra}' (formato: 71.5)"
     if p0.isupper():
-        if "-" in palabra or palabra.rstrip(string.digits).isupper():
-            return "E05", f"Código de materia mal formado '{palabra}' (formato: LFAC-301)"
+        if "-" in palabra or any(c.isdigit() for c in palabra):
+            return "E05", (f"Código de materia mal formado '{palabra}' "
+                           f"(son 4 dígitos, por ejemplo 8242)")
         return "E07", f"Identificador mal formado '{palabra}' (debe comenzar con minúscula)"
     if p0 in "-":
         return "E01", f"Símbolo '-' fuera de contexto en '{palabra}'"

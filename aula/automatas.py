@@ -24,18 +24,14 @@ PALABRA_MAYUS = AFD(
 )
 
 CODIGO_MATERIA = AFD(
-    "Código de materia", T.CODIGO_MATERIA, "[A-Z]{2,4}-[0-9]{3}",
-    estados=["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8"],
-    inicial="q0", finales=["q8"],
+    "Código de materia", T.CODIGO_MATERIA, "[0-9]{4}",
+    estados=["q0", "q1", "q2", "q3", "q4"],
+    inicial="q0", finales=["q4"],
     transiciones={
-        "q0": [("A-Z", "q1")],
-        "q1": [("A-Z", "q2")],
-        "q2": [("A-Z", "q3"), ("-", "q5")],
-        "q3": [("A-Z", "q4"), ("-", "q5")],
-        "q4": [("-", "q5")],
-        "q5": [("0-9", "q6")],
-        "q6": [("0-9", "q7")],
-        "q7": [("0-9", "q8")],
+        "q0": [("0-9", "q1")],
+        "q1": [("0-9", "q2")],
+        "q2": [("0-9", "q3")],
+        "q3": [("0-9", "q4")],
     },
 )
 
@@ -162,6 +158,10 @@ COMENTARIO = AFD(
 
 # Autómatas que reconocen "palabras" (secuencias sin separadores).
 # El orden es la prioridad en caso de empate de longitud.
+# El orden importa en los empates de la coincidencia más larga: CODIGO_MATERIA
+# va antes que ENTERO, así una palabra de exactamente 4 dígitos es un código de
+# materia (regla de prioridad, como las palabras reservadas frente a los
+# identificadores).
 AFD_PALABRAS = [IDENTIFICADOR, PALABRA_MAYUS, CODIGO_MATERIA, GRUPO, AULA,
                 RANGO_HORA, HORA, REAL, ENTERO]
 

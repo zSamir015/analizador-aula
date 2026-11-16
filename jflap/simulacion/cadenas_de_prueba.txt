@@ -19,13 +19,13 @@ lu               Reject
 L1               Reject
 
 [codigo_de_materia.jff]
-LFAC-301         Accept
-SO-302           Accept
-ABCD-999         Accept
-LFAC-30          Reject
-L-301            Reject
-LFACS-301        Reject
-lfac-301         Reject
+8242             Accept
+0638             Accept
+1498             Accept
+824              Reject
+82420            Reject
+LFAC-301         Reject
+82-42            Reject
 
 [grupo.jff]
 1IL142           Accept

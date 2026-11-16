@@ -19,8 +19,8 @@ class TestAFD(unittest.TestCase):
         self.comprobar(A.PALABRA_MAYUS, ["LU", "VI", "SA", "LFAC"], ["", "Lu", "L1"])
 
     def test_codigo_materia(self):
-        self.comprobar(A.CODIGO_MATERIA, ["SO-302", "LFAC-301", "BDA-100"],
-                       ["S-302", "LFACX-301", "LFAC-30", "LFAC-3010", "LFAC301", "lfac-301"])
+        self.comprobar(A.CODIGO_MATERIA, ["8242", "0638", "0001"],
+                       ["", "824", "82420", "LFAC-301", "82-42", "824A"])
 
     def test_grupo(self):
         self.comprobar(A.GRUPO, ["1IL142", "2IS131"], ["1IL14", "1I142", "IL142", "1IL1420"])

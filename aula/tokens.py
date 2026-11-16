@@ -51,7 +51,7 @@ ERRORES = {
     "E03": (LEXICO, "Número mal formado", "ENTERO [0-9]+ o REAL [0-9]+\\.[0-9]+"),
     "E04": (LEXICO, "Hora mal formada",
             "HORA ([01]?[0-9]|2[0-3]):[0-5][0-9] o RANGO_HORA HORA-HORA"),
-    "E05": (LEXICO, "Código de materia mal formado", "CODIGO_MATERIA [A-Z]{2,4}-[0-9]{3}"),
+    "E05": (LEXICO, "Código de materia mal formado", "CODIGO_MATERIA [0-9]{4} (cuatro dígitos)"),
     "E06": (LEXICO, "Grupo mal formado", "GRUPO [0-9][A-Z]{2}[0-9]{3}"),
     "E07": (LEXICO, "Identificador mal formado", "IDENTIFICADOR [a-z_][a-zA-Z0-9_]*"),
     "E08": (LEXICO, "Día inválido", "DIA LU | MA | MI | JU | VI"),

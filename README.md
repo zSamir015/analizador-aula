@@ -45,12 +45,12 @@ vacías y los comentarios (`# ...`) se ignoran. El archivo puede estar en UTF-8
 
 ```
 entero max_horas_dia = 6;
-materia LFAC-301 "Lenguajes Formales";
+materia 8242 "Lenguajes Formales";
 profesor samaniego "Nicolas Samaniego";
 aula 3-105 capacidad 40;
 grupo 1IL142;
-asignar LFAC-301 a 1IL142 con samaniego en 3-105 LU 7:00-8:30;
-eliminar LFAC-301 de 1IL142;
+asignar 8242 a 1IL142 con samaniego en 3-105 LU 7:00-8:30;
+eliminar 8242 de 1IL142;
 verificar choque 1IL142;
 mostrar horario de 1IL142;
 si horas_lunes > max_horas_dia o publicado == verdadero entonces mostrar "Revisar";
@@ -64,7 +64,7 @@ horas_lunes = 3;
 | IDENTIFICADOR | `[a-z_][a-zA-Z0-9_]*` (máx. 31) | `max_horas_dia` |
 | RESERVADA | 26 palabras en minúscula | `asignar` |
 | DIA | `LU \| MA \| MI \| JU \| VI` | `LU` |
-| CODIGO_MATERIA | `[A-Z]{2,4}-[0-9]{3}` | `LFAC-301` |
+| CODIGO_MATERIA | `[0-9]{4}` (exactamente 4 dígitos) | `8242` |
 | GRUPO | `[0-9][A-Z]{2}[0-9]{3}` | `1IL142` |
 | AULA | `[0-9]{1,2}-[0-9]{3}` | `3-105` |
 | HORA | `([01]?[0-9]\|2[0-3]):[0-5][0-9]` | `7:00` |
@@ -75,6 +75,11 @@ horas_lunes = 3;
 | OP_RELACIONAL | `== \| != \| < \| <= \| > \| >=` | `>=` |
 | ASIGNACION | `=` | `=` |
 | DELIMITADOR | `;` | `;` |
+
+Una palabra de exactamente 4 dígitos es CODIGO_MATERIA (`8242`, `0638`), no
+ENTERO: cuando dos AFD aceptan la misma longitud gana el que va primero en la
+lista, y el de código de materia va antes que el de entero. Los números de
+otra longitud (`40`, `824`, `82420`) son ENTERO.
 
 Palabras reservadas: `materia profesor aula grupo asignar eliminar verificar
 mostrar a con en de capacidad horario choque si entonces entero real
@@ -95,7 +100,7 @@ el analizador solo separa y clasifica los lexemas. Por ejemplo `grupo 1IL142`
 | E02 | Cadena sin cerrar | `"[^"\n]*"` | `"Hola;` |
 | E03 | Número mal formado | `[0-9]+` o `[0-9]+\.[0-9]+` | `71.` |
 | E04 | Hora mal formada | `([01]?[0-9]\|2[0-3]):[0-5][0-9]` | `25:70` |
-| E05 | Código de materia mal formado | `[A-Z]{2,4}-[0-9]{3}` | `LFAC-30` |
+| E05 | Código de materia mal formado | `[0-9]{4}` | `LFAC-301` |
 | E06 | Grupo mal formado | `[0-9][A-Z]{2}[0-9]{3}` | `1IL14` |
 | E07 | Identificador mal formado | `[a-z_][a-zA-Z0-9_]*` | `9horas`, `Total` |
 | E08 | Día inválido | `LU \| MA \| MI \| JU \| VI` | `SA` |
@@ -197,7 +202,7 @@ símbolo y los que colisionan aparecen seguidos con el mismo índice.
 | Columna | Significado |
 |---|---|
 | Índice | posición en la tabla: `hash(lexema) % capacidad` |
-| Lexema | texto tal como aparece en el archivo (`LFAC-301`, `samaniego`) |
+| Lexema | texto tal como aparece en el archivo (`8242`, `samaniego`) |
 | Token | tipo reconocido por el AFD (`CODIGO_MATERIA`, `IDENTIFICADOR`) |
 | Categoría | clase del token: materia, grupo, aula, identificador, literal, operador... |
 | Línea | línea de la primera aparición |
@@ -288,7 +293,7 @@ Windows, macOS y Linux.
 python3 -m unittest discover -s tests -t .
 ```
 
-50 pruebas: aceptación y rechazo de cada AFD y determinismo de las tablas
+53 pruebas: aceptación y rechazo de cada AFD y determinismo de las tablas
 (`test_afd.py`); tokens, posiciones, los 10 errores léxicos, que no se valida
 sintaxis ni semántica, archivos de ejemplo y codificaciones
 (`test_validador.py`); función hash, colisiones, redimensionamiento, formato y

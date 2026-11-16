@@ -41,7 +41,7 @@ SUGERENCIAS = {
     "E03": "Escriba el número completo: entero (40) o real con dígitos a ambos lados del punto (71.5).",
     "E04": "Use una hora entre 0:00 y 23:59 con minutos de dos dígitos (7:30) "
            "o un rango de dos horas unidas por '-' (7:00-8:30).",
-    "E05": "El código de materia lleva de 2 a 4 letras mayúsculas, un guion y 3 dígitos (LFAC-301).",
+    "E05": "El código de materia son exactamente 4 dígitos, sin letras ni guion (8242).",
     "E06": "El grupo lleva un dígito, dos letras mayúsculas y tres dígitos (1IL142).",
     "E07": "Los identificadores empiezan con letra minúscula o '_' y solo usan letras, dígitos y '_'.",
     "E08": "Los días válidos son LU, MA, MI, JU y VI (en mayúscula).",

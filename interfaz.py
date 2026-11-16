@@ -101,7 +101,7 @@ TEMAS = {
 # Expresiones regulares para resaltado léxico en el visor de código fuente
 _RE_CADENA = re.compile(r'"[^"\n]*"?')
 _RE_COMENTARIO = re.compile(r"#.*$")
-_RE_CODIGO_MAT = re.compile(r"\b[A-Z]{2,4}-[0-9]{3}\b")
+_RE_CODIGO_MAT = re.compile(r"(?<![0-9:.-])\b[0-9]{4}\b(?![0-9:.-])")
 _RE_GRUPO = re.compile(r"\b[0-9][A-Z]{2}[0-9]{3}\b")
 _RE_AULA = re.compile(r"\b[0-9]{1,2}-[0-9]{3}\b")
 _RE_RANGO_HORA = re.compile(

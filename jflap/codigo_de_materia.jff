@@ -1,94 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--AFD Código de materia: [A-Z]{2,4}-[0-9]{3}-->
+<!--AFD Código de materia: [0-9]{4}-->
 <structure>
 	<type>fa</type>
 	<automaton>
 		<state id="0" name="q0">
 			<x>127.5</x>
-			<y>220.0</y>
+			<y>100.0</y>
 			<initial/>
 		</state>
 		<state id="1" name="q1">
-			<x>233.3</x>
-			<y>220.0</y>
-		</state>
-		<state id="2" name="q2">
-			<x>339.2</x>
-			<y>220.0</y>
-		</state>
-		<state id="3" name="q3">
-			<x>445.0</x>
-			<y>153.6</y>
-		</state>
-		<state id="4" name="q4">
-			<x>550.8</x>
+			<x>231.7</x>
 			<y>100.0</y>
 		</state>
-		<state id="5" name="q5">
-			<x>641.7</x>
-			<y>165.6</y>
+		<state id="2" name="q2">
+			<x>335.8</x>
+			<y>100.0</y>
 		</state>
-		<state id="6" name="q6">
-			<x>745.8</x>
-			<y>165.6</y>
+		<state id="3" name="q3">
+			<x>440.0</x>
+			<y>100.0</y>
 		</state>
-		<state id="7" name="q7">
-			<x>850.0</x>
-			<y>165.6</y>
-		</state>
-		<state id="8" name="q8">
-			<x>958.6</x>
-			<y>165.6</y>
+		<state id="4" name="q4">
+			<x>548.6</x>
+			<y>100.0</y>
 			<final/>
 		</state>
 		<transition>
 			<from>0</from>
 			<to>1</to>
-			<read>A-Z</read>
+			<read>0-9</read>
 		</transition>
 		<transition>
 			<from>1</from>
 			<to>2</to>
-			<read>A-Z</read>
+			<read>0-9</read>
 		</transition>
 		<transition>
 			<from>2</from>
 			<to>3</to>
-			<read>A-Z</read>
-		</transition>
-		<transition>
-			<from>2</from>
-			<to>5</to>
-			<read>-</read>
+			<read>0-9</read>
 		</transition>
 		<transition>
 			<from>3</from>
 			<to>4</to>
-			<read>A-Z</read>
-		</transition>
-		<transition>
-			<from>3</from>
-			<to>5</to>
-			<read>-</read>
-		</transition>
-		<transition>
-			<from>4</from>
-			<to>5</to>
-			<read>-</read>
-		</transition>
-		<transition>
-			<from>5</from>
-			<to>6</to>
-			<read>0-9</read>
-		</transition>
-		<transition>
-			<from>6</from>
-			<to>7</to>
-			<read>0-9</read>
-		</transition>
-		<transition>
-			<from>7</from>
-			<to>8</to>
 			<read>0-9</read>
 		</transition>
 	</automaton>

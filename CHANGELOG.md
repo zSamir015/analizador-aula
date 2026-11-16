@@ -16,6 +16,10 @@
   variables de créditos ni notas.
 - Se quitó la palabra reservada `creditos` (dato de matrícula): la sentencia
   de materia queda `materia CODIGO_MATERIA CADENA ;`. Quedan 26 reservadas.
+- El código de materia pasa a ser de 4 dígitos (`8242`, `0638`), como los
+  códigos de asignatura de la universidad. Una palabra de 4 dígitos es
+  CODIGO_MATERIA por prioridad sobre ENTERO. AFD, JFLAP y diagrama regenerados.
+- Se quitó la vista "Cubetas hash" de la ventana de la tabla de símbolos.
 - La tabla de símbolos se muestra ordenada por índice hash, con las columnas
   Índice, Lexema, Token, Categoría, Línea y Apariciones, y una leyenda.
 

@@ -27,7 +27,7 @@ class TestTablaSimbolos(unittest.TestCase):
         tabla = TablaSimbolos()
         self.assertEqual(TablaSimbolos.hash("abc"), TablaSimbolos.hash("abc"))
         self.assertNotEqual(TablaSimbolos.hash("abc"), TablaSimbolos.hash("acb"))
-        for lexema in ("x", "max_creditos", "LFAC-301", "7:00-8:30"):
+        for lexema in ("x", "max_creditos", "8242", "7:00-8:30"):
             self.assertTrue(0 <= tabla.indice(lexema) < tabla.capacidad)
 
     def test_ocurrencias_y_primera_aparicion(self):
@@ -43,8 +43,8 @@ class TestTablaSimbolos(unittest.TestCase):
         self.assertEqual(sum(1 for s in tabla if s.lexema == "1"), 1)
 
     def test_solo_informacion_lexica(self):
-        tabla = tabla_de('materia LFAC-301 "Lenguajes";', "entero max = 18;")
-        m = tabla.buscar("LFAC-301")
+        tabla = tabla_de('materia 8242 "Lenguajes";', "entero max = 18;")
+        m = tabla.buscar("8242")
         self.assertEqual((m.tipo, m.categoria), (T.CODIGO_MATERIA, "materia"))
         self.assertEqual(tabla.buscar("max").categoria, "identificador")
         self.assertFalse(hasattr(m, "atributos"))
